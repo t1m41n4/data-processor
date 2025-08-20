@@ -65,3 +65,24 @@ Thumbs.db
 /student-data-processor/backend/*.pdf
 /student-data-processor/backend/*.csv
 /student-data-processor/backend/*.xlsx
+
+# Temporary POI files (SXSSFWorkbook creates these)
+*.tmp
+sxssf-*
+poi-sxssf-book*
+**/temp/
+**/tmp/
+
+# Large data files
+**/*_1000000_*.xlsx
+**/*_500000_*.xlsx
+**/*_100000_*.xlsx
+
+# Cache and security scan files
+.cache_ggshield
+**/.cache_*
+
+# Development and testing files
+**/run-with-memory.bat
+**/*.new.ts
+**/*.backup.*
