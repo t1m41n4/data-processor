@@ -6,7 +6,7 @@ This project demonstrates two core objectives for student data processing:
 
 > **📥 Download Instructions**: Due to the large file sizes of the demonstration videos, you need to download them to view properly. Click on the video links below, then click the **"View raw"** button on the next page to start the download.
 
-### Objective A: Data Generation
+### Objective A: Data Generation - Performance (28.72 Seconds)
 📹 **[Objective A.mp4](./Objective%20A.mp4)** *(Click → View raw → Download)*
 
 This video demonstrates the data generation functionality, including:
@@ -15,7 +15,7 @@ This video demonstrates the data generation functionality, including:
 - Data structure and format validation
 - **Fast performance**: 1 million records generated in seconds
 
-### Objective B: Data Processing
+### Objective B: Data Processing - Performance (36 Seconds)
 📹 **[Objective B.mp4](./Objective%20B.mp4)** *(Click → View raw → Download)*
 
 This video demonstrates the data processing functionality, including:
