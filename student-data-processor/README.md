@@ -29,7 +29,7 @@ This video demonstrates the data processing functionality, including:
 ## Sample Files
 📁 **Demonstration outputs:**
 
-- 📄 **[student_data_20250820_234320_1000000_records.xlsx](./student_data_20250820_234320_1000000_records.xlsx?raw=true)** *(Download)* - Excel file with 1 million records generated using Objective A
+- 📄 **[student_data_20250820_234320_1000000_records.xlsx](./student_data_20250820_234320_1000000_records.xlsx)** *(Click → View raw → Download)* - Excel file with 1 million records generated using Objective A
 - 📄 **[temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv](./temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv)** *(View/Download)* - CSV file converted from Excel using Objective B
 
 > 💡 **Note**: These are the actual files generated during the demonstration shown in the videos above.
