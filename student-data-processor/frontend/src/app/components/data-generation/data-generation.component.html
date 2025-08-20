@@ -109,41 +109,6 @@
     </div>
   </div>
 
-  <!-- Feature Information -->
-  <div class="info-panel" *ngIf="!loading">
-    <h3>Data Generation Features</h3>
-    <div class="features-grid">
-      <div class="feature-item">
-        <span class="feature-icon">👨‍🎓</span>
-        <div class="feature-content">
-          <h4>Student Records</h4>
-          <p>Generated with StudentId, Name, Age, and Class information</p>
-        </div>
-      </div>
-      <div class="feature-item">
-        <span class="feature-icon">📊</span>
-        <div class="feature-content">
-          <h4>Academic Scores</h4>
-          <p>Random scores between 60-100 for realistic data simulation</p>
-        </div>
-      </div>
-      <div class="feature-item">
-        <span class="feature-icon">📁</span>
-        <div class="feature-content">
-          <h4>Excel Format</h4>
-          <p>Standard Excel (.xlsx) format ready for processing</p>
-        </div>
-      </div>
-      <div class="feature-item">
-        <span class="feature-icon">⚡</span>
-        <div class="feature-content">
-          <h4>High Performance</h4>
-          <p>Efficiently generates large datasets up to 10 million records</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Workflow Navigation -->
   <div class="workflow-nav" *ngIf="lastResult && !loading">
     <h3>Next Steps</h3>
@@ -151,14 +116,6 @@
       <a routerLink="/process" class="btn btn-workflow">
         <span class="workflow-icon">🔄</span>
         Objective B: Process Excel to CSV
-      </a>
-      <a routerLink="/upload" class="btn btn-workflow">
-        <span class="workflow-icon">📤</span>
-        Objective C: Upload to Database
-      </a>
-      <a routerLink="/reports" class="btn btn-workflow">
-        <span class="workflow-icon">📈</span>
-        Objective D: Generate Reports
       </a>
     </div>
   </div>
