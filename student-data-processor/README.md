@@ -4,8 +4,10 @@
 
 This project demonstrates two core objectives for student data processing:
 
+> **📥 Note**: Due to the large file sizes of the demonstration videos, you may need to download them to view properly. Click on the video links below to download.
+
 ### Objective A: Data Generation
-📹 **[Objective A.mp4](./Objective%20A.mp4)**
+📹 **[Objective A.mp4](./Objective%20A.mp4)** *(Download to view)*
 
 This video demonstrates the data generation functionality, including:
 - Creating student data in Excel format
@@ -13,14 +15,12 @@ This video demonstrates the data generation functionality, including:
 - Data structure and format validation
 
 ### Objective B: Data Processing
-📹 **[Objective B.mp4](./Objective%20B.mp4)**
+📹 **[Objective B.mp4](./Objective%20B.mp4)** *(Download to view)*
 
 This video demonstrates the data processing functionality, including:
 - Converting Excel files to CSV format
 - Applying score adjustments (+10 points)
-- Processing validation and results display
-
-## Technologies Used
+- Processing validation and results display## Technologies Used
 - **Frontend**: Angular 18
 - **Backend**: Java Spring Boot
 - **File Processing**: Excel to CSV conversion
