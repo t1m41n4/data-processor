@@ -98,9 +98,10 @@ public class DataUploadService {
         // Parse className
         student.setClassName(data[4].trim());
 
-        // Parse score and add +5 (CSV score = Excel score + 10, DB score = CSV score + 5)
+        // Parse score and adjust to match spec: database score = Excel score + 5
+        // CSV currently contains Excel score + 10, so subtract 5 to derive database score
         int csvScore = Integer.parseInt(data[5].trim());
-        int databaseScore = csvScore + 5;
+        int databaseScore = csvScore - 5;
         student.setScore(databaseScore);
 
         return student;

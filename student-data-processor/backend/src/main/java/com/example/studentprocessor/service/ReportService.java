@@ -182,8 +182,9 @@ public class ReportService {
         // Get filtered data
         Page<Student> students = getStudentReports(studentId, className, 0, Integer.MAX_VALUE, "studentId", "asc");
 
-        Document document = new Document();
+        // Create and write PDF document
         try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
+            Document document = new Document();
             PdfWriter.getInstance(document, fileOut);
             document.open();
 
@@ -213,14 +214,13 @@ public class ReportService {
                 table.addCell(new Phrase(student.getStudentId().toString(), dataFont));
                 table.addCell(new Phrase(student.getFirstName(), dataFont));
                 table.addCell(new Phrase(student.getLastName(), dataFont));
-                table.addCell(new Phrase(student.getDob().toString(), dataFont));
                 table.addCell(new Phrase(student.getClassName(), dataFont));
                 table.addCell(new Phrase(student.getScore().toString(), dataFont));
             }
 
             document.add(table);
+            document.close();
         }
-        document.close();
 
         return fileName;
     }
