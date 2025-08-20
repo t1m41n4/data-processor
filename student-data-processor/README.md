@@ -22,8 +22,14 @@ This video demonstrates the data processing functionality, including:
 - Converting Excel files to CSV format
 - Applying score adjustments (+10 points)
 - Processing validation and results display
+- **Fast performance**: Processing completed in seconds
 
 > **💡 Note**: The Objective B video shows the existence of 2 files - one in Excel format and another in CSV format, indicating that both Objective A (data generation) and Objective B (data processing) worked successfully.
+
+## Sample Files
+📁 **Example outputs from the demonstration:**
+- `student_data_20250820_234320_1000000_records.xlsx` - Excel file generated using Objective A
+- `temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv` - CSV file converted from the Excel file using Objective B
 
 ## Technologies Used
 - **Frontend**: Angular 18.0.0
