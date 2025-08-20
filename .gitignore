@@ -73,8 +73,8 @@ poi-sxssf-book*
 **/temp/
 **/tmp/
 
-# Large data files
-**/*_1000000_*.xlsx
+# Large data files (excluding demonstration files)
+# **/*_1000000_*.xlsx  # Commented out to allow demonstration files
 **/*_500000_*.xlsx
 **/*_100000_*.xlsx
 
