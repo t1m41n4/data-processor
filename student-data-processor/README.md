@@ -13,6 +13,7 @@ This video demonstrates the data generation functionality, including:
 - Creating student data in Excel format
 - Generating sample datasets
 - Data structure and format validation
+- **Fast performance**: 1 million records generated in seconds
 
 ### Objective B: Data Processing
 📹 **[Objective B.mp4](./Objective%20B.mp4)** *(Click → View raw → Download)*
@@ -25,15 +26,11 @@ This video demonstrates the data processing functionality, including:
 > **💡 Note**: The Objective B video shows the existence of 2 files - one in Excel format and another in CSV format, indicating that both Objective A (data generation) and Objective B (data processing) worked successfully.
 
 ## Technologies Used
-- **Frontend**: Angular 18
-- **Backend**: Java Spring Boot
-- **File Processing**: Excel to CSV conversion
-- **UI**: Modern responsive design with gradient styling
+- **Frontend**: Angular 18.0.0
+- **Backend**: Java Spring Boot 3.4.5
+- **Java Version**: Java 17
+- **Database**: PostgreSQL
 
-## Quick Start
-1. **Frontend**: Navigate to `frontend` directory and run `npm start`
-2. **Backend**: Navigate to `backend` directory and run with Maven
-3. **Access**: Open `http://localhost:4200` in your browser
 
 ---
 *Watch the demonstration videos above to see the application in action.*
