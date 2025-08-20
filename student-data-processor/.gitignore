@@ -1,0 +1,42 @@
+# Java/Spring Boot
+/target/
+*.class
+*.jar
+*.war
+*.iml
+*.log
+*.tmp
+*.swp
+
+# Maven
+/apache-maven-*/
+.mvn/
+
+# Node/Angular
+/frontend/node_modules/
+/dist/
+/.angular/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets and cache
+.cache_ggshield
+*.env
+
+# Sample/test data
+/test-upload-data.csv
+
+# Misc
+*.bak
+*.orig
+
+# Ignore frontend build
+/frontend/dist/

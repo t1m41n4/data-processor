@@ -1,0 +1,75 @@
+<div class="app-container">
+  <!-- Navigation Header -->
+  <nav class="app-nav">
+    <div class="nav-container">
+      <h1 class="app-title">
+        <span class="title-icon">🎓</span>
+        {{ title }}
+      </h1>
+
+      <div class="nav-links">
+        <a
+          routerLink="/generate"
+          routerLinkActive="active"
+          class="nav-link"
+          title="Generate sample student data">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-text">Data Generation</span>
+        </a>
+
+        <a
+          routerLink="/process"
+          routerLinkActive="active"
+          class="nav-link"
+          title="Process and analyze student data">
+          <span class="nav-icon">🔄</span>
+          <span class="nav-text">Data Processing</span>
+        </a>
+
+        <a
+          routerLink="/upload"
+          routerLinkActive="active"
+          class="nav-link"
+          title="Upload CSV files to database">
+          <span class="nav-icon">📤</span>
+          <span class="nav-text">Data Upload</span>
+        </a>
+
+        <a
+          routerLink="/reports"
+          routerLinkActive="active"
+          class="nav-link"
+          title="View reports with advanced filtering">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">Reports</span>
+        </a>
+
+        <a
+          routerLink="/student-list"
+          routerLinkActive="active"
+          class="nav-link"
+          title="Manage student records">
+          <span class="nav-icon">👥</span>
+          <span class="nav-text">Student List</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>&copy; 2024 Student Data Processor. Built with Angular 18+ & Spring Boot 3.4.5</p>
+      <div class="footer-links">
+        <a href="#" class="footer-link">About</a>
+        <a href="#" class="footer-link">Help</a>
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+    </div>
+  </footer>
+</div>

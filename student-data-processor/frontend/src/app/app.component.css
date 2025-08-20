@@ -1,0 +1,256 @@
+nav {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+nav h1 {
+  margin: 0 0 10px 0;
+}
+
+nav a {
+  display: inline-block;
+  margin-right: 20px;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+
+nav a.active {
+  background-color: #007bff;
+  color: white;
+}
+
+main {
+  padding: 20px;
+}
+
+/* Navigation */
+.main-nav {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-brand {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.nav-brand h1 {
+  margin: 0 0 5px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #ffffff, #f0f8ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.nav-brand p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+  font-weight: 300;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px 20px;
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.nav-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.nav-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 0;
+  min-height: calc(100vh - 160px);
+}
+
+/* Footer */
+.app-footer {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  color: white;
+  padding: 25px 30px;
+  margin-top: auto;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-link {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.footer-link:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .main-nav {
+    padding: 15px 20px;
+  }
+
+  .nav-brand h1 {
+    font-size: 2rem;
+  }
+
+  .nav-brand p {
+    font-size: 1rem;
+  }
+
+  .nav-menu {
+    gap: 10px;
+  }
+
+  .nav-link {
+    padding: 12px 15px;
+    min-width: 100px;
+  }
+
+  .nav-icon {
+    font-size: 1.8rem;
+    margin-bottom: 6px;
+  }
+
+  .nav-text {
+    font-size: 0.8rem;
+  }
+
+  .footer-content {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .footer-links {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-nav {
+    padding: 12px 15px;
+  }
+
+  .nav-brand h1 {
+    font-size: 1.8rem;
+  }
+
+  .nav-menu {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-link {
+    flex-direction: row;
+    padding: 10px 15px;
+    min-width: auto;
+    width: 100%;
+    max-width: 300px;
+    justify-content: flex-start;
+  }
+
+  .nav-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+    margin-right: 10px;
+  }
+
+  .nav-text {
+    font-size: 0.9rem;
+  }
+}
+
+/* Global Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content > * {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Accessibility improvements */
+.nav-link:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}
+
+.footer-link:focus {
+  outline: 1px solid rgba(255, 255, 255, 0.7);
+  outline-offset: 2px;
+}

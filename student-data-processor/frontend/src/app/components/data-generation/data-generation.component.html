@@ -1,0 +1,165 @@
+<div class="data-generation-container">
+  <div class="header">
+    <h2>Objective A: Data Generation</h2>
+    <p class="subtitle">Generate Excel files with student data</p>
+  </div>
+
+  <div class="generation-form">
+    <form (ngSubmit)="generateData()" #dataForm="ngForm">
+      <div class="form-group">
+        <label for="recordCount">Number of Records to Generate:</label>
+        <input
+          type="number"
+          id="recordCount"
+          [(ngModel)]="recordCount"
+          name="recordCount"
+          required
+          min="1"
+          max="10000000"
+          class="form-control"
+          [class.error]="recordCount <= 0"
+          placeholder="Enter number of records (e.g., 1000000)">
+        <div class="validation-hint" *ngIf="recordCount <= 0">
+          Please enter a valid number greater than 0
+        </div>
+        <div class="info-hint">
+          Recommended: 1,000,000 records for comprehensive testing
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button
+          type="submit"
+          [disabled]="loading || !dataForm.valid || recordCount <= 0"
+          class="btn btn-primary">
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Generating Excel File...' : 'Generate Student Data Excel' }}
+        </button>
+
+        <button
+          type="button"
+          (click)="clearResults()"
+          [disabled]="loading || !lastResult"
+          class="btn btn-secondary">
+          Clear Results
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div *ngIf="loading" class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+    <p class="progress-text">Generating {{ recordCount | number }} student records...</p>
+    <div class="status-details">
+      <div class="status-item">
+        <span class="status-icon">📊</span>
+        <span>Creating student data with random information</span>
+      </div>
+      <div class="status-item">
+        <span class="status-icon">📝</span>
+        <span>Formatting Excel file structure</span>
+      </div>
+      <div class="status-item">
+        <span class="status-icon">💾</span>
+        <span>Saving to server directory</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Result -->
+  <div *ngIf="successMessage && !loading" class="alert alert-success">
+    <div class="alert-header">
+      <span class="alert-icon">✅</span>
+      <h3>Excel File Generated Successfully!</h3>
+    </div>
+    <div class="alert-content">
+      <p>{{ successMessage }}</p>
+      <div *ngIf="lastResult" class="result-details">
+        <h4>Generation Details:</h4>
+        <ul class="result-list">
+          <li><strong>Records Generated:</strong> {{ lastResult.recordCount | number }}</li>
+          <li><strong>File Name:</strong> {{ lastResult.fileName }}</li>
+          <li><strong>File Size:</strong> {{ lastResult.fileSize }}</li>
+          <li><strong>Generation Time:</strong> {{ lastResult.generationTime }}</li>
+          <li><strong>Status:</strong> Ready for Data Processing (Objective B)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !loading" class="alert alert-error">
+    <div class="alert-header">
+      <span class="alert-icon">❌</span>
+      <h3>Generation Failed</h3>
+    </div>
+    <div class="alert-content">
+      <p>{{ errorMessage }}</p>
+      <div class="troubleshooting">
+        <h4>Troubleshooting:</h4>
+        <ul>
+          <li>Ensure the backend server is running on port 8080</li>
+          <li>Check that the record count is within valid limits (1 - 10,000,000)</li>
+          <li>Verify sufficient disk space for file generation</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature Information -->
+  <div class="info-panel" *ngIf="!loading">
+    <h3>Data Generation Features</h3>
+    <div class="features-grid">
+      <div class="feature-item">
+        <span class="feature-icon">👨‍🎓</span>
+        <div class="feature-content">
+          <h4>Student Records</h4>
+          <p>Generated with StudentId, Name, Age, and Class information</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📊</span>
+        <div class="feature-content">
+          <h4>Academic Scores</h4>
+          <p>Random scores between 60-100 for realistic data simulation</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">📁</span>
+        <div class="feature-content">
+          <h4>Excel Format</h4>
+          <p>Standard Excel (.xlsx) format ready for processing</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-content">
+          <h4>High Performance</h4>
+          <p>Efficiently generates large datasets up to 10 million records</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow Navigation -->
+  <div class="workflow-nav" *ngIf="lastResult && !loading">
+    <h3>Next Steps</h3>
+    <div class="workflow-buttons">
+      <a routerLink="/process" class="btn btn-workflow">
+        <span class="workflow-icon">🔄</span>
+        Objective B: Process Excel to CSV
+      </a>
+      <a routerLink="/upload" class="btn btn-workflow">
+        <span class="workflow-icon">📤</span>
+        Objective C: Upload to Database
+      </a>
+      <a routerLink="/reports" class="btn btn-workflow">
+        <span class="workflow-icon">📈</span>
+        Objective D: Generate Reports
+      </a>
+    </div>
+  </div>
+</div>
