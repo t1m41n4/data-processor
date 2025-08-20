@@ -57,7 +57,7 @@ export class DataProcessingComponent {
     this.clearMessages();
   }
 
-  onProcessFile() {
+  processFile() {
     if (!this.selectedFile) {
       this.errorMessage = 'Please select an Excel file to process';
       return;
@@ -94,15 +94,7 @@ export class DataProcessingComponent {
       });
   }
 
-  clearSelection() {
-    this.selectedFile = null;
-    this.clearMessages();
-    // Reset file input
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-    if (fileInput) fileInput.value = '';
-  }
-
-  private clearMessages() {
+  clearMessages() {
     this.successMessage = '';
     this.errorMessage = '';
     this.lastProcessingResult = null;

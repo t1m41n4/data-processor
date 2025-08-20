@@ -3,6 +3,7 @@ package com.example.studentprocessor.service;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -45,39 +46,53 @@ public class DataGenerationService {
         String fileName = String.format("student_data_%s_%d_records.xlsx", timestamp, recordCount);
         String fullPath = excelOutputPath + fileName;
 
-        // Use SXSSFWorkbook for streaming with minimal memory usage
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook(MEMORY_ROWS)) {
-            // Enable compression to reduce temp file size
-            workbook.setCompressTempFiles(true);
+        // Use XSSFWorkbook for small files, SXSSFWorkbook for large files
+        if (recordCount <= 10000) {
+            // Use XSSFWorkbook for small files to ensure compatibility
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+                Sheet sheet = workbook.createSheet("Students");
 
-            Sheet sheet = workbook.createSheet("Students");
+                // Create header row
+                createHeaderRow(sheet);
 
-            // Create header row
-            createHeaderRow(sheet);
+                // Generate student data rows
+                generateStudentDataRows(sheet, recordCount);
 
-            // Generate student data rows with optimized memory management
-            generateStudentDataRowsOptimized(sheet, recordCount);
-
-            // Don't auto-size columns for large datasets (too expensive)
-            // Disabled auto-sizing to prevent streaming workbook issues
-            // if (recordCount <= 5000) {
-            //     try {
-            //         autoSizeColumns(sheet);
-            //     } catch (Exception e) {
-            //         System.out.println("Skipping column auto-sizing due to: " + e.getMessage());
-            //     }
-            // }
-
-            // Write to file
-            try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
-                workbook.write(fileOut);
+                // Write to file
+                try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
+                    workbook.write(fileOut);
+                    fileOut.flush();
+                }
             }
+        } else {
+            // Use SXSSFWorkbook for large files with streaming
+            try (SXSSFWorkbook workbook = new SXSSFWorkbook(MEMORY_ROWS)) {
+                // Enable compression to reduce temp file size
+                workbook.setCompressTempFiles(true);
 
-            // Clean up temporary files
-            workbook.dispose();
-        }
+                Sheet sheet = workbook.createSheet("Students");
 
-        // Performance reporting
+                // Create header row
+                createHeaderRow(sheet);
+
+                // Generate student data rows with optimized memory management
+                generateStudentDataRowsOptimized(sheet, recordCount);
+
+                // Write to file with explicit flush & sync to avoid truncated files
+                try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
+                    workbook.write(fileOut);
+                    fileOut.flush();
+                    try {
+                        fileOut.getFD().sync();
+                    } catch (IOException e) {
+                        System.err.println("Warning: FileDescriptor.sync() failed: " + e.getMessage());
+                    }
+                }
+
+                // Dispose of temporary files after writing
+                workbook.dispose();
+            }
+        }        // Performance reporting
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         double recordsPerSecond = recordCount / (duration / 1000.0);
@@ -108,6 +123,38 @@ public class DataGenerationService {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
             cell.setCellStyle(headerStyle);
+        }
+    }
+
+    private void generateStudentDataRows(Sheet sheet, int recordCount) {
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        // Pre-calculate date range for better performance
+        long startEpochDay = LocalDate.of(2000, 1, 1).toEpochDay();
+        long endEpochDay = LocalDate.of(2010, 12, 31).toEpochDay();
+        long dateRange = endEpochDay - startEpochDay + 1;
+
+        for (int i = 1; i <= recordCount; i++) {
+            Row row = sheet.createRow(i);
+
+            // studentId - numeric incremental starting from 1
+            row.createCell(0).setCellValue(i);
+
+            // firstName - from pre-generated pool for speed
+            row.createCell(1).setCellValue(FIRST_NAMES[random.nextInt(FIRST_NAMES.length)]);
+
+            // lastName - from pre-generated pool for speed
+            row.createCell(2).setCellValue(LAST_NAMES[random.nextInt(LAST_NAMES.length)]);
+
+            // DOB - optimized random date generation
+            LocalDate randomDate = LocalDate.ofEpochDay(startEpochDay + random.nextLong(dateRange));
+            row.createCell(3).setCellValue(randomDate.toString());
+
+            // class - random from predefined options
+            row.createCell(4).setCellValue(CLASS_OPTIONS[random.nextInt(CLASS_OPTIONS.length)]);
+
+            // score - random number between 55 and 75
+            row.createCell(5).setCellValue(55 + random.nextInt(21));
         }
     }
 
