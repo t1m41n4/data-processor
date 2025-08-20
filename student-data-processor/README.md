@@ -29,14 +29,10 @@ This video demonstrates the data processing functionality, including:
 ## Sample Files
 📁 **Demonstration outputs:**
 
-**Available for download:**
-- 📄 **[test_excel.xlsx](./test_excel.xlsx)** - Sample Excel file
+- 📄 **[student_data_20250820_234320_1000000_records.xlsx](./student_data_20250820_234320_1000000_records.xlsx)** - Excel file with 1 million records generated using Objective A
+- 📄 **[temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv](./temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv)** - CSV file converted from Excel using Objective B
 
-**Generated during demonstration (shown in videos):**
-- `student_data_20250820_234320_1000000_records.xlsx` - Excel file with 1 million records (too large for GitHub)
-- `temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv` - Processed CSV file (too large for GitHub)
-
-> 💡 **Note**: The large demonstration files exceed GitHub's file size limits but are visible in the videos. The sample Excel file above can be used to test the application.
+> 💡 **Note**: These are the actual files generated during the demonstration shown in the videos above.
 
 ## Technologies Used
 - **Frontend**: Angular 18.0.0
