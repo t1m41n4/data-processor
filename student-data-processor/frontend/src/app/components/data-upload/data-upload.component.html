@@ -1,0 +1,147 @@
+<div class="upload-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 2rem;">
+  <!-- Header Section -->
+  <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
+    <h1 style="color: white !important; font-size: 2rem; margin: 0 0 0.5rem 0;">📤 Data Upload - Objective C</h1>
+    <p style="color: white !important; margin: 0; opacity: 0.9;">Upload CSV files to database with automatic +5 score adjustment</p>
+  </div>
+
+  <!-- File Upload Section -->
+  <div class="upload-section" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+    <div
+      class="file-drop-zone"
+      style="border: 3px dashed #667eea; border-radius: 12px; padding: 3rem; text-align: center; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);"
+      [class.has-file]="selectedFile"
+      (click)="triggerFileInput()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onFileDropped($event)">
+
+      <input
+        #fileInput
+        type="file"
+        id="fileInput"
+        accept=".csv"
+        (change)="onFileSelected($event)"
+        style="display: none;">
+
+      <label for="fileInput" class="upload-label">
+        <div class="upload-icon">💾</div>
+        <div class="upload-text">
+          <span *ngIf="!selectedFile" class="upload-main">Click to select CSV file</span>
+          <span *ngIf="selectedFile" class="upload-main">{{ getFileInfo() }}</span>
+          <span class="upload-hint">Supports .csv files (max {{ formatFileSize(maxFileSize) }})</span>
+        </div>
+      </label>
+    </div>
+
+    <div class="file-requirements" *ngIf="!selectedFile">
+      <h4>File Requirements:</h4>
+      <ul>
+        <li>✅ CSV format (.csv)</li>
+        <li>✅ Contains student data with columns: StudentId, FirstName, LastName, DOB, Class, Score</li>
+        <li>✅ Maximum file size: {{ formatFileSize(maxFileSize) }}</li>
+        <li>✅ Processed from Objective B or similar structure</li>
+      </ul>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="button-group" *ngIf="selectedFile" (click)="$event.stopPropagation()">
+      <button
+        (click)="onUploadFile()"
+        [disabled]="isUploading || !selectedFile"
+        class="btn btn-primary">
+        <span *ngIf="isUploading" class="spinner"></span>
+        {{ isUploading ? 'Uploading to Database...' : 'Upload to Database (+5 Score Boost)' }}
+      </button>
+
+      <button
+        (click)="clearSelection()"
+        [disabled]="isUploading"
+        class="btn btn-secondary">
+        Clear Selection
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div class="progress-container" *ngIf="uploadProgress > 0 && uploadProgress < 100">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+    </div>
+    <div class="progress-text">Uploading... {{ uploadProgress }}%</div>
+  </div>
+
+  <!-- Error Display -->
+  <div class="error-container" *ngIf="errorMessage">
+    <h4>❌ Upload Error</h4>
+    <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Results Display -->
+  <div class="results-container" *ngIf="uploadResult">
+    <h3>⚡ Upload Successful!</h3>
+
+    <!-- Performance Banner -->
+    <div class="performance-banner" [ngClass]="uploadResult.mode === 'ULTRA-FAST' ? 'ultra-fast-mode' : 'optimized-mode'">
+      <span class="mode-label">{{ uploadResult.mode }} MODE</span>
+      <span class="performance-metric" *ngIf="uploadResult.recordsPerSecond">
+        {{ uploadResult.recordsPerSecond }} records/sec
+      </span>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value">{{ uploadResult.recordsProcessed }}</div>
+        <div class="stat-label">Records Processed</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ uploadResult.recordsStored }}</div>
+        <div class="stat-label">Records Stored</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ uploadResult.processingTimeMs }}ms</div>
+        <div class="stat-label">Processing Time</div>
+      </div>
+      <div class="stat-item" *ngIf="uploadResult.recordsPerSecond">
+        <div class="stat-value">{{ uploadResult.recordsPerSecond }}</div>
+        <div class="stat-label">Records/Second</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">+5</div>
+        <div class="stat-label">Score Boost Applied</div>
+      </div>
+    </div>
+
+    <!-- Verification Message -->
+    <div class="verification-section" *ngIf="uploadResult.verificationMessage">
+      <h4>🔍 Verification Results</h4>
+      <pre class="verification-text">{{ uploadResult.verificationMessage }}</pre>
+    </div>
+  </div>
+
+  <!-- Workflow Visualization -->
+  <div class="workflow-container">
+    <h3>Upload Process Flow</h3>
+    <div class="workflow-steps">
+      <div class="workflow-step">
+        <div class="step-icon">📁</div>
+        <div class="step-label">Select CSV</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="workflow-step">
+        <div class="step-icon">📤</div>
+        <div class="step-label">Upload File</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="workflow-step">
+        <div class="step-icon">⚙️</div>
+        <div class="step-label">Score +5</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="workflow-step">
+        <div class="step-icon">💾</div>
+        <div class="step-label">Database</div>
+      </div>
+    </div>
+  </div>
+</div>

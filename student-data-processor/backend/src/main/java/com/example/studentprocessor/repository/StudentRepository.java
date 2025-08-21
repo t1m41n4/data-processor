@@ -4,21 +4,45 @@ import com.example.studentprocessor.entity.Student;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByStudentId(Long studentId);
 
-    Page<Student> findByClassName(String className, Pageable pageable);
-
     boolean existsByStudentId(Long studentId);
+
+    // Bulk existence check for performance
+    @Query("SELECT s.studentId FROM Student s WHERE s.studentId IN :studentIds")
+    Set<Long> findExistingStudentIds(@Param("studentIds") Set<Long> studentIds);
+
+    // Bulk insert using native SQL for maximum performance
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO students (student_id, first_name, last_name, score, class_name, dob) " +
+                   "VALUES (:studentId, :firstName, :lastName, :score, :className, :dob)",
+           nativeQuery = true)
+    void bulkInsertStudent(@Param("studentId") Long studentId,
+                          @Param("firstName") String firstName,
+                          @Param("lastName") String lastName,
+                          @Param("score") Integer score,
+                          @Param("className") String className,
+                          @Param("dob") LocalDate dob);
+
+    @Query("SELECT s FROM Student s ORDER BY s.id DESC")
+    List<Student> findTop10ByOrderByIdDesc();
+
+    Page<Student> findByClassName(String className, Pageable pageable);
 
     @Query("SELECT DISTINCT s.className FROM Student s ORDER BY s.className")
     List<String> findDistinctClassNames();

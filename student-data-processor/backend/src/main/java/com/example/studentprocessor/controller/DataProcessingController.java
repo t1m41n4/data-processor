@@ -1,5 +1,6 @@
 package com.example.studentprocessor.controller;
 
+import com.example.studentprocessor.dto.ProcessingResult;
 import com.example.studentprocessor.service.DataProcessingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,7 +54,7 @@ public class DataProcessingController {
             }
 
             long startTime = System.currentTimeMillis();
-            String csvFileName = dataProcessingService.convertExcelToCsv(file);
+            ProcessingResult result = dataProcessingService.convertExcelToCsv(file);
             long endTime = System.currentTimeMillis();
 
             double processingTime = (endTime - startTime) / 1000.0;
@@ -65,8 +66,9 @@ public class DataProcessingController {
 
             response.put("success", true);
             response.put("message", "Excel file successfully converted to CSV with +10 score adjustment applied to all records");
-            response.put("csvFilePath", "C:/var/log/applications/API/dataprocessing/" + csvFileName);
+            response.put("csvFilePath", "C:/var/log/applications/API/dataprocessing/" + result.getCsvFileName());
             response.put("processingTime", String.format("%.2f seconds", processingTime));
+            response.put("recordsProcessed", result.getRecordsProcessed());
 
             return ResponseEntity.ok(response);
 

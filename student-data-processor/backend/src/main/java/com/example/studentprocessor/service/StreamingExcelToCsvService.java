@@ -1,5 +1,6 @@
 package com.example.studentprocessor.service;
 
+import com.example.studentprocessor.dto.ProcessingResult;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
@@ -20,7 +21,7 @@ public class StreamingExcelToCsvService {
 
     private static final String OUTPUT_DIR = "C:/var/log/applications/API/dataprocessing/";
 
-    public String convertExcelToCsvStreaming(String excelFilePath) throws Exception {
+    public ProcessingResult convertExcelToCsvStreaming(String excelFilePath) throws Exception {
         System.out.println("=== Starting Streaming Excel to CSV Conversion ===");
         System.out.println("Input file: " + excelFilePath);
 
@@ -33,6 +34,7 @@ public class StreamingExcelToCsvService {
         System.out.println("Output CSV: " + csvFilePath);
 
         long startTime = System.currentTimeMillis();
+        SheetHandler handler = new SheetHandler();
 
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFilePath))) {
             // Write CSV header
@@ -43,7 +45,7 @@ public class StreamingExcelToCsvService {
             XSSFReader reader = new XSSFReader(pkg);
             ReadOnlySharedStringsTable sst = new ReadOnlySharedStringsTable(pkg);
 
-            XMLReader parser = fetchSheetParser(sst, writer);
+            XMLReader parser = fetchSheetParser(sst, writer, handler);
 
             // Get first sheet and process streaming
             try (InputStream sheet = reader.getSheetsData().next()) {
@@ -59,23 +61,24 @@ public class StreamingExcelToCsvService {
 
         System.out.println(String.format("Streaming conversion completed in %.2f seconds", processingTime));
         System.out.println("CSV file created: " + csvFileName);
+        System.out.println("Records processed: " + handler.getRecordCount());
 
-        return csvFileName;
+        return new ProcessingResult(csvFileName, handler.getRecordCount(), processingTime);
     }
 
-    private XMLReader fetchSheetParser(ReadOnlySharedStringsTable sst, BufferedWriter writer)
+    private XMLReader fetchSheetParser(ReadOnlySharedStringsTable sst, BufferedWriter writer, SheetHandler handler)
             throws SAXException, ParserConfigurationException {
 
         XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
-        ContentHandler handler = new SheetHandler(sst, writer);
+        handler.initialize(sst, writer);
         parser.setContentHandler(handler);
         return parser;
     }
 
     // Custom handler to stream rows and apply +10 score adjustment
     private static class SheetHandler extends DefaultHandler {
-        private final ReadOnlySharedStringsTable sst;
-        private final BufferedWriter writer;
+        private ReadOnlySharedStringsTable sst;
+        private BufferedWriter writer;
 
         private boolean nextIsString;
         private boolean isInlineString;
@@ -85,9 +88,13 @@ public class StreamingExcelToCsvService {
         private int rowCount = 0;
         private boolean isHeaderRow = true;
 
-        public SheetHandler(ReadOnlySharedStringsTable sst, BufferedWriter writer) {
+        public void initialize(ReadOnlySharedStringsTable sst, BufferedWriter writer) {
             this.sst = sst;
             this.writer = writer;
+        }
+
+        public int getRecordCount() {
+            return rowCount;
         }
 
         @Override

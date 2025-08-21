@@ -82,7 +82,7 @@ export class DataProcessingComponent {
             originalFileName: this.selectedFile!.name,
             csvFileName: this.extractFileNameFromPath(response.csvFilePath),
             csvFilePath: response.csvFilePath,
-            recordsProcessed: this.extractRecordCount(response.message),
+            recordsProcessed: response.recordsProcessed || 0,
             processingTime: `${duration} seconds`,
             scoreAdjustment: '+10 points added to all scores'
           };

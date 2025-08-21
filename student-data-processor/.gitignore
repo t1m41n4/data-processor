@@ -31,8 +31,24 @@ Thumbs.db
 .cache_ggshield
 *.env
 
-# Sample/test data
+# Sample/test data and uploads
+*.csv
+*.xlsx
+*.xls
 /test-upload-data.csv
+temp_*
+student_data_*
+
+# Database files
+/backend/data/
+*.mv.db
+*.trace.db
+
+# Generated reports and exports
+*.pdf
+class_*_report.pdf
+latest_pdf_report.pdf
+test_pdf_*.pdf
 
 # Misc
 *.bak
