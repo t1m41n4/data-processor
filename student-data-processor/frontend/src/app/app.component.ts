@@ -10,5 +10,5 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'Student Data Generator & Processor';
+  title = 'Student Data Processor';
 }
