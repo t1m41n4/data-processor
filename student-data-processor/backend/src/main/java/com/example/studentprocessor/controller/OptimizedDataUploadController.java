@@ -27,64 +27,42 @@ public class OptimizedDataUploadController {
         this.ultraHighPerformanceService = ultraHighPerformanceService;
     }
 
-    @PostMapping("/csv/ultra-fast")
-    public ResponseEntity<Map<String, Object>> uploadCsvFileUltraFast(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/csv")
+    public ResponseEntity<Map<String, Object>> uploadCsvFile(@RequestParam("file") MultipartFile file) {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            System.out.println("⚡ ULTRA-FAST MODE: " + file.getOriginalFilename() +
+            // Smart selection: Use ultra-fast for large files (10MB+), optimized for smaller files
+            boolean useUltraFast = file.getSize() > 10 * 1024 * 1024; // 10MB threshold
+            String mode = useUltraFast ? "ULTRA-FAST" : "OPTIMIZED";
+
+            System.out.println("🚀 Starting " + mode + " CSV upload: " + file.getOriginalFilename() +
                              " (" + String.format("%.2f MB", file.getSize() / (1024.0 * 1024.0)) + ")");
 
-            OptimizedDataUploadService.UploadResult result = ultraHighPerformanceService.uploadCsvUltraFast(file);
+            OptimizedDataUploadService.UploadResult result;
+
+            if (useUltraFast) {
+                result = ultraHighPerformanceService.uploadCsvUltraFast(file);
+                response.put("message", "⚡ Ultra-fast processing completed!");
+            } else {
+                result = optimizedDataUploadService.uploadCsvFileOptimized(file);
+                response.put("message", "🚀 Optimized processing completed!");
+            }
 
             response.put("success", true);
+            response.put("mode", mode);
             response.put("totalRecords", result.getTotalRecords());
             response.put("newRecords", result.getNewRecords());
             response.put("skippedRecords", result.getSkippedRecords());
             response.put("processingTime", result.getProcessingTime());
             response.put("verificationMessage", result.getVerificationMessage());
-            response.put("message", "⚡ Ultra-fast processing completed!");
 
-            double recordsPerSecond = result.getTotalRecords() / (result.getProcessingTime() / 1000.0);
-            response.put("recordsPerSecond", Math.round(recordsPerSecond));
+            if (result.getProcessingTime() > 0) {
+                double recordsPerSecond = result.getTotalRecords() / (result.getProcessingTime() / 1000.0);
+                response.put("recordsPerSecond", Math.round(recordsPerSecond));
+            }
 
-            System.out.println("⚡ Ultra-fast upload completed successfully");
-
-            return ResponseEntity.ok(response);
-
-        } catch (IOException e) {
-            System.err.println("❌ IO Error during ultra-fast upload: " + e.getMessage());
-            response.put("success", false);
-            response.put("message", "IO Error: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
-
-        } catch (Exception e) {
-            System.err.println("❌ Error during ultra-fast upload: " + e.getMessage());
-            response.put("success", false);
-            response.put("message", "Processing error: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
-        }
-    }
-
-    @PostMapping("/csv/optimized")
-    public ResponseEntity<Map<String, Object>> uploadCsvFileOptimized(@RequestParam("file") MultipartFile file) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            System.out.println("🚀 Starting optimized CSV upload: " + file.getOriginalFilename() +
-                             " (" + String.format("%.2f MB", file.getSize() / (1024.0 * 1024.0)) + ")");
-
-            OptimizedDataUploadService.UploadResult result = optimizedDataUploadService.uploadCsvFileOptimized(file);
-
-            response.put("success", true);
-            response.put("totalRecords", result.getTotalRecords());
-            response.put("newRecords", result.getNewRecords());
-            response.put("skippedRecords", result.getSkippedRecords());
-            response.put("processingTime", result.getProcessingTime());
-            response.put("verificationMessage", result.getVerificationMessage());
-            response.put("message", "File uploaded and processed successfully with optimizations!");
-
-            System.out.println("✅ Optimized upload completed successfully");
+            System.out.println("✅ " + mode + " upload completed successfully");
 
             return ResponseEntity.ok(response);
 
@@ -112,14 +90,16 @@ public class OptimizedDataUploadController {
     @GetMapping("/progress")
     public ResponseEntity<Map<String, Object>> getUploadProgress() {
         Map<String, Object> response = new HashMap<>();
-        response.put("progress", optimizedDataUploadService.getProgress());
-        return ResponseEntity.ok(response);
-    }
 
-    @GetMapping("/progress/ultra-fast")
-    public ResponseEntity<Map<String, Object>> getUltraFastProgress() {
-        Map<String, Object> response = new HashMap<>();
-        response.put("progress", ultraHighPerformanceService.getProgress());
+        // Get progress from both services and return the higher value (active one)
+        int optimizedProgress = optimizedDataUploadService.getProgress();
+        int ultraFastProgress = ultraHighPerformanceService.getProgress();
+        int currentProgress = Math.max(optimizedProgress, ultraFastProgress);
+
+        response.put("progress", currentProgress);
+        response.put("optimizedProgress", optimizedProgress);
+        response.put("ultraFastProgress", ultraFastProgress);
+
         return ResponseEntity.ok(response);
     }
 }
