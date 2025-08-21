@@ -1,0 +1,303 @@
+<div class="reports-container">
+  <!-- Header -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📊 Student Reports & Analytics</h2>
+      <p>Advanced reporting with search, filtering, and export capabilities</p>
+    </div>
+  </div>
+
+  <!-- Statistics Dashboard -->
+  <div class="statistics-grid" *ngIf="statistics">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ statistics.totalStudents }}</h3>
+        <p>Total Students</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <div class="stat-content">
+        <h3>{{ statistics.averageScore | number:'1.1-1' }}%</h3>
+        <p>Average Score</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <h3>{{ statistics.passCount }}</h3>
+        <p>Passed ({{ statistics.passRate | number:'1.1-1' }}%)</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">❌</div>
+      <div class="stat-content">
+        <h3>{{ statistics.failCount }}</h3>
+        <p>Failed</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Controls Bar -->
+  <div class="controls-section">
+    <div class="search-container">
+      <div class="search-input-wrapper">
+        <input
+          type="text"
+          [(ngModel)]="searchFilters.search"
+          (keyup.enter)="onSearch()"
+          placeholder="Search students by name, email, or ID..."
+          class="search-input">
+        <button (click)="onSearch()" class="search-btn" [disabled]="isLoading">
+          <span class="search-icon">🔍</span>
+        </button>
+      </div>
+
+      <div class="action-buttons">
+        <button (click)="toggleFilters()" class="btn btn-outline">
+          <span class="filter-icon">🔧</span>
+          {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+        </button>
+        <button (click)="clearFilters()" class="btn btn-secondary">
+          <span class="clear-icon">🗑️</span>
+          Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="export-section">
+      <h4>Export Options:</h4>
+      <div class="export-buttons">
+        <button
+          (click)="exportData('excel')"
+          class="btn btn-export excel"
+          [disabled]="isExporting">
+          <span class="export-icon">📊</span>
+          {{ isExporting ? 'Exporting...' : 'Excel' }}
+        </button>
+        <button
+          (click)="exportData('pdf')"
+          class="btn btn-export pdf"
+          [disabled]="isExporting">
+          <span class="export-icon">📄</span>
+          PDF
+        </button>
+        <button
+          (click)="exportData('csv')"
+          class="btn btn-export csv"
+          [disabled]="isExporting">
+          <span class="export-icon">📋</span>
+          CSV
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced Filters Panel -->
+  <div class="filters-panel" *ngIf="showFilters">
+    <div class="card">
+      <div class="card-header">
+        <h3>🎯 Advanced Filters</h3>
+      </div>
+      <div class="card-body">
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="class-filter">Class:</label>
+            <select
+              id="class-filter"
+              [(ngModel)]="searchFilters.className"
+              (change)="onFilterChange()"
+              class="filter-select">
+              <option value="">All Classes</option>
+              <option *ngFor="let className of availableClasses" [value]="className">
+                {{ className }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label for="min-score">Min Score:</label>
+            <input
+              id="min-score"
+              type="number"
+              [(ngModel)]="searchFilters.minScore"
+              (input)="onFilterChange()"
+              min="0"
+              max="100"
+              class="filter-input"
+              placeholder="0">
+          </div>
+
+          <div class="filter-group">
+            <label for="max-score">Max Score:</label>
+            <input
+              id="max-score"
+              type="number"
+              [(ngModel)]="searchFilters.maxScore"
+              (input)="onFilterChange()"
+              min="0"
+              max="100"
+              class="filter-input"
+              placeholder="100">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Performers -->
+  <div class="top-performers" *ngIf="topPerformers.length > 0">
+    <div class="card">
+      <div class="card-header">
+        <h3>🏆 Top Performers</h3>
+      </div>
+      <div class="card-body">
+        <div class="performers-list">
+          <div *ngFor="let student of topPerformers; let i = index" class="performer-item">
+            <div class="rank">{{ i + 1 }}</div>
+            <div class="student-info">
+              <strong>{{ student.firstName }} {{ student.lastName }}</strong>
+              <span class="student-class">{{ student.className }}</span>
+            </div>
+            <div class="score" [ngClass]="getScoreBadge(student.score)">
+              {{ student.score }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading students...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-error">
+    <span class="error-icon">⚠️</span>
+    {{ errorMessage }}
+    <button (click)="clearMessages()" class="close-btn">✕</button>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    <span class="success-icon">✅</span>
+    {{ successMessage }}
+    <button (click)="clearMessages()" class="close-btn">✕</button>
+  </div>
+
+  <!-- Students Table -->
+  <div class="table-container" *ngIf="!isLoading && students.length > 0">
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Student Records</h3>
+        <p>Showing {{ students.length }} of {{ totalItems }} students</p>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th (click)="sortBy_Column('studentId')" class="sortable">
+                  ID {{ getSortIcon('studentId') }}
+                </th>
+                <th (click)="sortBy_Column('firstName')" class="sortable">
+                  Name {{ getSortIcon('firstName') }}
+                </th>
+                <th (click)="sortBy_Column('email')" class="sortable">
+                  Email {{ getSortIcon('email') }}
+                </th>
+                <th (click)="sortBy_Column('className')" class="sortable">
+                  Class {{ getSortIcon('className') }}
+                </th>
+                <th (click)="sortBy_Column('score')" class="sortable">
+                  Score {{ getSortIcon('score') }}
+                </th>
+                <th>Grade</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let student of students" class="data-row">
+                <td class="student-id">{{ student.studentId }}</td>
+                <td class="student-name">
+                  <strong>{{ student.firstName }} {{ student.lastName }}</strong>
+                </td>
+                <td class="student-email">{{ student.email }}</td>
+                <td class="student-class">{{ student.className }}</td>
+                <td class="student-score" [ngClass]="getScoreColor(student.score)">
+                  <strong>{{ student.score }}%</strong>
+                </td>
+                <td>
+                  <span class="grade-badge" [ngClass]="getScoreBadge(student.score)">
+                    {{ student.score >= 81 ? 'A' : student.score >= 61 ? 'B' : student.score >= 41 ? 'C' : 'F' }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="!isLoading && students.length > 0">
+    <div class="pagination-info">
+      <p>Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalItems }} total students)</p>
+    </div>
+
+    <div class="pagination-controls">
+      <button
+        (click)="goToFirstPage()"
+        [disabled]="currentPage === 0"
+        class="btn btn-pagination">
+        First
+      </button>
+
+      <button
+        (click)="goToPreviousPage()"
+        [disabled]="!hasPrevious"
+        class="btn btn-pagination">
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPageNumbers()"
+          (click)="goToPage(page)"
+          [class.active]="page === currentPage"
+          class="btn btn-page">
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        (click)="goToNextPage()"
+        [disabled]="!hasNext"
+        class="btn btn-pagination">
+        Next
+      </button>
+
+      <button
+        (click)="goToLastPage()"
+        [disabled]="currentPage === totalPages - 1"
+        class="btn btn-pagination">
+        Last
+      </button>
+    </div>
+  </div>
+
+  <!-- No Data State -->
+  <div *ngIf="!isLoading && students.length === 0" class="no-data-container">
+    <div class="no-data-content">
+      <div class="no-data-icon">📊</div>
+      <h3>No Students Found</h3>
+      <p>No student records match your current search criteria.</p>
+      <button (click)="clearFilters()" class="btn btn-primary">Clear Filters</button>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ package com.example.studentprocessor.controller;
 
 import com.example.studentprocessor.entity.Student;
 import com.example.studentprocessor.service.ReportService;
+import com.example.studentprocessor.service.TestDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,10 +19,12 @@ import java.util.Map;
 public class ReportController {
 
     private final ReportService reportService;
+    private final TestDataService testDataService;
 
     @Autowired
-    public ReportController(ReportService reportService) {
+    public ReportController(ReportService reportService, TestDataService testDataService) {
         this.reportService = reportService;
+        this.testDataService = testDataService;
     }
 
     // 1. Pagination
@@ -219,6 +222,30 @@ public class ReportController {
             return ResponseEntity.ok(classes);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Generate test data for testing reports
+    @PostMapping("/generate-test-data/{count}")
+    public ResponseEntity<Map<String, Object>> generateTestData(@PathVariable int count) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String result = testDataService.generateTestStudents(count);
+
+            response.put("success", true);
+            response.put("message", result);
+            response.put("studentsCreated", count);
+            response.put("totalStudents", reportService.getReportStatistics().get("totalStudents"));
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error generating test data: " + e.getMessage());
+            response.put("error", e.getClass().getSimpleName());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

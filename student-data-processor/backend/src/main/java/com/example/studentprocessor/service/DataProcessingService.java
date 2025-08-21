@@ -1,5 +1,6 @@
 package com.example.studentprocessor.service;
 
+import com.example.studentprocessor.dto.ProcessingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class DataProcessingService {
     @Autowired
     private StreamingExcelToCsvService streamingService;
 
-    public String convertExcelToCsv(MultipartFile file) throws IOException {
+    public ProcessingResult convertExcelToCsv(MultipartFile file) throws IOException {
         System.out.println("=== Excel to CSV Processing Started ===");
         System.out.printf("File: %s (%.2f MB)%n", file.getOriginalFilename(), file.getSize() / (1024.0 * 1024.0));
 
@@ -42,13 +43,13 @@ public class DataProcessingService {
             System.out.println("Saved temp file: " + tempFilePath);
 
             // Use streaming conversion for all files to avoid memory issues
-            String csvFileName = streamingService.convertExcelToCsvStreaming(tempFilePath);
+            ProcessingResult result = streamingService.convertExcelToCsvStreaming(tempFilePath);
 
             // Clean up temp file
             Files.deleteIfExists(Paths.get(tempFilePath));
             System.out.println("Cleaned up temp file");
 
-            return csvFileName;
+            return result;
 
         } catch (Exception e) {
             // Clean up temp file on error

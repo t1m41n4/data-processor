@@ -7,7 +7,12 @@ import jakarta.validation.constraints.Max;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "students")
+@Table(name = "students",
+       indexes = {
+           @Index(name = "idx_student_id", columnList = "student_id"),
+           @Index(name = "idx_class_name", columnList = "class_name"),
+           @Index(name = "idx_score", columnList = "score")
+       })
 public class Student {
 
     @Id
