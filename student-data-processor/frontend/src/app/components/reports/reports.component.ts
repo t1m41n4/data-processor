@@ -353,4 +353,33 @@ export class ReportsComponent implements OnInit {
   toggleFilters(): void {
     this.showFilters = !this.showFilters;
   }
+
+  deleteAllRecords(): void {
+    // Check if there are any records to delete
+    if (!this.statistics || this.statistics.totalStudents === 0) {
+      this.errorMessage = '';
+      this.successMessage = 'Database is already empty. No records to delete.';
+      return;
+    }
+
+    // Confirm before deleting
+    if (confirm(`WARNING: This action will permanently delete ALL ${this.statistics.totalStudents} records from the database. This cannot be undone. Continue?`)) {
+      this.isLoading = true;
+      this.errorMessage = '';
+      this.successMessage = '';
+
+      this.http.delete(`${this.apiUrl}/clear-data`).subscribe({
+        next: () => {
+          this.successMessage = `Successfully deleted ${this.statistics?.totalStudents || 'all'} records from the database`;
+          this.isLoading = false;
+          // Reload data to reflect the changes
+          this.loadInitialData();
+        },
+        error: (error) => {
+          this.errorMessage = 'Failed to delete records: ' + (error.error?.message || error.message);
+          this.isLoading = false;
+        }
+      });
+    }
+  }
 }

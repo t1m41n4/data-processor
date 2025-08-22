@@ -1,15 +1,14 @@
-<div class="upload-container" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 2rem;">
+<div class="upload-container">
   <!-- Header Section -->
-  <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; color: white !important; padding: 2rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.15);">
-    <h1 style="color: white !important; font-size: 2rem; margin: 0 0 0.5rem 0;">📤 Data Upload - Objective C</h1>
-    <p style="color: white !important; margin: 0; opacity: 0.9;">Upload CSV files to database with automatic +5 score adjustment</p>
+  <div class="header">
+    <h1>📤 Data Upload - Objective C</h1>
+    <p>Upload CSV files to database with automatic +5 score adjustment</p>
   </div>
 
   <!-- File Upload Section -->
-  <div class="upload-section" style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 8px 25px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+  <div class="upload-section">
     <div
       class="file-drop-zone"
-      style="border: 3px dashed #667eea; border-radius: 12px; padding: 3rem; text-align: center; background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);"
       [class.has-file]="selectedFile"
       (click)="triggerFileInput()"
       (dragover)="onDragOver($event)"
@@ -46,13 +45,29 @@
 
     <!-- Action Buttons -->
     <div class="button-group" *ngIf="selectedFile" (click)="$event.stopPropagation()">
+      <!-- Upload Button - Only shown when not uploading -->
       <button
+        *ngIf="!isUploading"
         (click)="onUploadFile()"
-        [disabled]="isUploading || !selectedFile"
+        [disabled]="!selectedFile"
         class="btn btn-primary">
-        <span *ngIf="isUploading" class="spinner"></span>
-        {{ isUploading ? 'Uploading to Database...' : 'Upload to Database (+5 Score Boost)' }}
+        Upload to Database (+5 Score Boost)
       </button>
+
+      <!-- Cancel Button - Only shown when uploading -->
+      <button
+        *ngIf="isUploading"
+        (click)="cancelUpload()"
+        class="btn btn-danger">
+        <span class="cancel-icon">⚠️</span>
+        Cancel Upload
+      </button>
+
+      <!-- Upload Status - Only shown when uploading -->
+      <div *ngIf="isUploading" class="upload-status">
+        <span class="spinner"></span>
+        <span>Uploading to Database... Partial data will be available for reporting.</span>
+      </div>
 
       <button
         (click)="clearSelection()"
@@ -75,6 +90,12 @@
   <div class="error-container" *ngIf="errorMessage">
     <h4>❌ Upload Error</h4>
     <p>{{ errorMessage }}</p>
+  </div>
+
+  <!-- Success Message Display -->
+  <div class="success-container" *ngIf="successMessage">
+    <h4>✅ Notice</h4>
+    <p>{{ successMessage }}</p>
   </div>
 
   <!-- Results Display -->

@@ -6,6 +6,8 @@
 *.nar
 *.log
 *.tmp
+hs_err_pid*.log
+replay_pid*.log
 
 # Maven
 target/
@@ -46,6 +48,9 @@ package-lock.json
 **/*_export.*
 DatabaseTest.java
 SimpleDBTest.java
+FileUploadTest.class
+score_logic_test.java
+test_decimal_ids.csv
 
 # Generated files
 *.zip
@@ -65,6 +70,9 @@ Thumbs.db
 /student-data-processor/backend/*.pdf
 /student-data-processor/backend/*.csv
 /student-data-processor/backend/*.xlsx
+/student-data-processor/backend/data/
+**/*.mv.db
+**/*.trace.db
 
 # Temporary POI files (SXSSFWorkbook creates these)
 *.tmp
