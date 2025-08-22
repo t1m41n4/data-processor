@@ -1,45 +1,21 @@
-# Student Data Processor
+# Student Data Processor - Backend
 
-## Project Demonstration
+## Overview
 
-This project demonstrates two core objectives for student data processing:
+Spring Boot backend application for student data processing.
 
-> **📥 Download Instructions**: Due to the large file sizes of the demonstration videos, you need to download them to view properly. Click on the video links below, then click the **"View raw"** button on the next page to start the download.
+## Features
 
-### Objective A: Data Generation - Performance (28.72 Seconds)
-📹 **[Objective A.mp4](../Objective%20A.mp4)** *(Click → View raw → Download)*
-
-This video demonstrates the data generation functionality, including:
-- Creating student data in Excel format
-- Generating sample datasets
-- Data structure and format validation
-- **Fast performance**: 1 million records generated in seconds
-
-### Objective B: Data Processing - Performance (36 Seconds)
-📹 **[Objective B.mp4](../Objective%20B.mp4)** *(Click → View raw → Download)*
-
-This video demonstrates the data processing functionality, including:
-- Converting Excel files to CSV format
-- Applying score adjustments (+10 points)
-- Processing validation and results display
-- **Fast performance**: Processing completed in seconds
-
-> **💡 Note**: The Objective B video shows the existence of 2 files - one in Excel format and another in CSV format, indicating that both Objective A (data generation) and Objective B (data processing) worked successfully.
-
-## Sample Files
-📁 **Demonstration outputs:**
-
-- 📄 **[student_data_20250820_234320_1000000_records.xlsx](../student_data_20250820_234320_1000000_records.xlsx)** *(Click → View raw → Download)* - Excel file with 1 million records generated using Objective A
-- 📄 **[temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv](../temp_1755722830488_student_data_20250820_234320_1000000_records_processed_20250820_234710.csv)** *(View/Download)* - CSV file converted from Excel using Objective B
-
-> 💡 **Note**: These are the actual files generated during the demonstration shown in the videos above.
+- **Data Generation**: Generate student datasets in Excel format
+- **File Conversion**: Convert Excel files to CSV format
+- **Database Upload**: Upload CSV data to database
+- **Upload Cancellation**: Cancel uploads while preserving partial data
 
 ## Technologies Used
-- **Frontend**: Angular 18.0.0
-- **Backend**: Java Spring Boot 3.4.5
-- **Java Version**: Java 17
-- **Database**: PostgreSQL
 
-
----
-*Watch the demonstration videos above to see the application in action.*
+- **Framework**: Spring Boot 3.4.5
+- **Language**: Java 17
+- **Database**: PostgreSQL (H2 for development)
+- **ORM**: Spring Data JPA with Hibernate
+- **File Processing**: Apache POI for Excel, OpenCSV for CSV
+- **Build Tool**: Maven 3.9.4
