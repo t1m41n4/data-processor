@@ -1,6 +1,7 @@
 package com.example.studentprocessor.controller;
 
 import com.example.studentprocessor.entity.Student;
+import com.example.studentprocessor.repository.StudentRepository;
 import com.example.studentprocessor.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,10 +19,12 @@ import java.util.Map;
 public class ReportController {
 
     private final ReportService reportService;
+    private final StudentRepository studentRepository;
 
     @Autowired
-    public ReportController(ReportService reportService) {
+    public ReportController(ReportService reportService, StudentRepository studentRepository) {
         this.reportService = reportService;
+        this.studentRepository = studentRepository;
     }
 
     // 1. Pagination
@@ -219,6 +222,28 @@ public class ReportController {
             return ResponseEntity.ok(classes);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // Clear all data from the database
+    @DeleteMapping("/clear-data")
+    public ResponseEntity<Map<String, Object>> clearAllData() {
+        try {
+            long recordsDeleted = studentRepository.count();
+            studentRepository.deleteAll();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Database cleared successfully");
+            response.put("recordsDeleted", recordsDeleted);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "Failed to clear database: " + e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

@@ -93,6 +93,20 @@
         </button>
       </div>
     </div>
+
+    <!-- Database Actions -->
+    <div class="database-actions-section">
+      <h4>Database Actions:</h4>
+      <div class="database-buttons">
+        <button
+          (click)="deleteAllRecords()"
+          class="btn btn-danger"
+          [disabled]="isLoading">
+          <span class="delete-icon">🗑️</span>
+          Delete All Records
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Advanced Filters Panel -->

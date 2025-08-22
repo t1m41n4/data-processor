@@ -137,8 +137,19 @@ public class StreamingExcelToCsvService {
                         // Apply +10 to score column (index 5) for data rows only
                         if (columnIndex == 5 && !isHeaderRow) {
                             try {
-                                int score = Integer.parseInt(lastContents.trim());
+                                // Handle decimal format scores by converting to double first, then to int
+                                double scoreDouble = Double.parseDouble(lastContents.trim());
+                                int score = (int) scoreDouble;
                                 currentRowData[columnIndex] = String.valueOf(score + 10);
+                            } catch (NumberFormatException e) {
+                                currentRowData[columnIndex] = lastContents;
+                            }
+                        } else if (columnIndex == 0 && !isHeaderRow) {
+                            // Format student ID as integer (remove decimal points)
+                            try {
+                                double studentIdDouble = Double.parseDouble(lastContents.trim());
+                                long studentId = (long) studentIdDouble;
+                                currentRowData[columnIndex] = String.valueOf(studentId);
                             } catch (NumberFormatException e) {
                                 currentRowData[columnIndex] = lastContents;
                             }

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -9,7 +9,6 @@ export interface ProcessingResult {
   csvFilePath: string;
   recordsProcessed: number;
   processingTime: string;
-  scoreAdjustment: string;
 }
 
 @Component({
@@ -17,137 +16,110 @@ export interface ProcessingResult {
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './data-processing.component.html',
-  styleUrls: ['./data-processing.component.css']
+  styleUrls: ['./data-processing.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class DataProcessingComponent {
   selectedFile: File | null = null;
   isProcessing: boolean = false;
-
-  // Result management
-  successMessage: string = '';
+  processingResult: ProcessingResult | null = null;
   errorMessage: string = '';
-  lastProcessingResult: ProcessingResult | null = null;
 
-  // File validation
-  acceptedFileTypes = ['.xlsx', '.xls'];
-  maxFileSize = 100 * 1024 * 1024; // 100MB
+  private readonly apiUrl = 'http://localhost:8080/api/process';
+  private readonly maxFileSize = 100 * 1024 * 1024; // 100MB
 
-  private http = inject(HttpClient);
+  constructor(private http: HttpClient) {}
 
-  onFileSelected(event: any) {
+  onFileSelected(event: any): void {
     const file = event.target.files[0];
-    if (!file) return;
+    if (file) {
+      this.selectedFile = file;
+      this.errorMessage = '';
+      this.processingResult = null;
 
-    // Validate file type
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    if (!this.acceptedFileTypes.includes(fileExtension)) {
-      this.errorMessage = `Invalid file type. Please select an Excel file (${this.acceptedFileTypes.join(', ')})`;
-      this.selectedFile = null;
-      return;
+      // Validate file
+      if (!this.isExcelFile(file)) {
+        this.errorMessage = 'Please select an Excel file (.xlsx or .xls)';
+        this.selectedFile = null;
+        return;
+      }
+
+      if (file.size > this.maxFileSize) {
+        this.errorMessage = `File size exceeds maximum limit of ${this.formatFileSize(this.maxFileSize)}`;
+        this.selectedFile = null;
+        return;
+      }
     }
-
-    // Validate file size
-    if (file.size > this.maxFileSize) {
-      this.errorMessage = `File too large. Maximum size is ${this.formatFileSize(this.maxFileSize)}`;
-      this.selectedFile = null;
-      return;
-    }
-
-    this.selectedFile = file;
-    this.clearMessages();
   }
 
-  processFile() {
+  processFile(): void {
     if (!this.selectedFile) {
-      this.errorMessage = 'Please select an Excel file to process';
+      this.errorMessage = 'Please select a file first';
       return;
     }
 
     this.isProcessing = true;
-    this.clearMessages();
+    this.errorMessage = '';
+    this.processingResult = null;
 
-    const startTime = Date.now();
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.http.post<any>('http://localhost:8080/api/process', formData)
-      .subscribe({
-        next: (response: any) => {
-          const endTime = Date.now();
-          const duration = ((endTime - startTime) / 1000).toFixed(2);
+    console.log('🚀 Starting Excel to CSV processing...', this.selectedFile.name);
 
-          this.isProcessing = false;
-          this.successMessage = response.message;
-          this.lastProcessingResult = {
+    this.http.post<any>(this.apiUrl, formData).subscribe({
+      next: (response) => {
+        console.log('✅ Processing successful:', response);
+
+        if (response.success) {
+          this.processingResult = {
             originalFileName: this.selectedFile!.name,
-            csvFileName: this.extractFileNameFromPath(response.csvFilePath),
+            csvFileName: response.csvFileName,
             csvFilePath: response.csvFilePath,
-            recordsProcessed: response.recordsProcessed || 0,
-            processingTime: `${duration} seconds`,
-            scoreAdjustment: '+10 points added to all scores'
+            recordsProcessed: response.recordsProcessed,
+            processingTime: response.processingTime
           };
-        },
-        error: (error: HttpErrorResponse) => {
-          this.isProcessing = false;
-          this.errorMessage = this.formatErrorMessage(error);
+        } else {
+          this.errorMessage = response.message || 'Processing failed';
         }
-      });
+
+        this.isProcessing = false;
+      },
+      error: (error: HttpErrorResponse) => {
+        console.error('❌ Processing failed:', error);
+
+        if (error.error && error.error.message) {
+          this.errorMessage = error.error.message;
+        } else if (error.status === 0) {
+          this.errorMessage = 'Unable to connect to server. Please ensure the backend is running.';
+        } else {
+          this.errorMessage = `Server error: ${error.message}`;
+        }
+
+        this.isProcessing = false;
+      }
+    });
   }
 
-  clearMessages() {
-    this.successMessage = '';
+  resetForm(): void {
+    this.selectedFile = null;
+    this.isProcessing = false;
+    this.processingResult = null;
     this.errorMessage = '';
-    this.lastProcessingResult = null;
   }
 
-  private extractFileNameFromPath(filePath: string): string {
-    // Extract filename from full path like "C:/var/log/applications/API/dataprocessing/filename.csv"
-    const parts = filePath.split('/');
-    return parts[parts.length - 1] || 'processed_data.csv';
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  private extractFileName(response: string): string {
-    // Extract CSV filename from response like "Excel file processed successfully: processed_student_data.csv"
-    const match = response.match(/processed_\w+\.csv/);
-    return match ? match[0] : 'processed_data.csv';
-  }
-
-  private extractFilePath(response: string): string {
-    // Since backend saves to a specific directory, construct the path
-    const fileName = this.extractFileName(response);
-    return `/downloads/${fileName}`;
-  }
-
-  private extractRecordCount(response: string): number {
-    // Try to extract record count from response if available
-    const match = response.match(/(\d+) records?/i);
-    return match ? parseInt(match[1]) : 0;
-  }
-
-  private formatErrorMessage(error: HttpErrorResponse): string {
-    if (error.status === 0) {
-      return 'Unable to connect to the backend server. Please ensure the Spring Boot application is running on port 8080.';
-    }
-    if (error.status === 400) {
-      return 'Invalid Excel file format. Please ensure the file contains the expected student data structure.';
-    }
-    if (error.status === 413) {
-      return 'File too large. Please try with a smaller file.';
-    }
-    if (error.status === 500) {
-      return 'Server error during processing. Please check the file format and try again.';
-    }
-    return `Error ${error.status}: ${error.error || error.message || 'Unknown error occurred'}`;
-  }
-
-  private formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  getFileInfo(): string {
-    if (!this.selectedFile) return '';
-    return `${this.selectedFile.name} (${this.formatFileSize(this.selectedFile.size)})`;
+  private isExcelFile(file: File): boolean {
+    const fileName = file.name.toLowerCase();
+    return fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
   }
 }

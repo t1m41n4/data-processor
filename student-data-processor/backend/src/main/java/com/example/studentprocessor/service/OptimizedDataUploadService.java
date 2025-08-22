@@ -23,6 +23,7 @@ public class OptimizedDataUploadService {
     private final StudentRepository studentRepository;
     private final AtomicInteger progressCounter = new AtomicInteger(0);
     private int totalRecords = 0;
+    private volatile boolean cancelRequested = false;
 
     @Autowired
     public OptimizedDataUploadService(StudentRepository studentRepository) {
@@ -38,6 +39,9 @@ public class OptimizedDataUploadService {
         if (!isCsvFile(file)) {
             throw new IllegalArgumentException("Please upload a valid CSV file");
         }
+
+        // Reset cancel flag before starting a new upload
+        cancelRequested = false;
 
         long startTime = System.currentTimeMillis();
         List<Student> students = new ArrayList<>();
@@ -56,12 +60,12 @@ public class OptimizedDataUploadService {
             totalRecords = records.size() - (hasHeader ? 1 : 0);
             int startIndex = hasHeader ? 1 : 0;
 
-            System.out.println("⚡ Starting ULTRA-FAST optimized upload of " + totalRecords + " records...");
+            System.out.println("🚀 Starting optimized upload of " + totalRecords + " records...");
 
-            // Process in ULTRA-LARGE batches for maximum performance
-            final int ULTRA_BATCH_SIZE = 20000; // 4x increase for ultra-fast mode
+            // Process in larger batches for better performance
+            final int BATCH_SIZE = 5000; // Increased from 1000
 
-            for (int i = startIndex; i < records.size(); i++) {
+            for (int i = startIndex; i < records.size() && !cancelRequested; i++) {
                 String[] data = records.get(i);
 
                 try {
@@ -75,16 +79,15 @@ public class OptimizedDataUploadService {
                         }
                         processedRecords++;
 
-                        // Ultra-fast batch save for performance
-                        if (students.size() >= ULTRA_BATCH_SIZE) {
+                        // Batch save for performance
+                        if (students.size() >= BATCH_SIZE) {
                             studentRepository.saveAll(students);
                             students.clear();
 
                             // Update progress
                             progressCounter.set(processedRecords);
-                            System.out.println("⚡ ULTRA-FAST Progress: " + processedRecords + "/" + totalRecords +
-                                             " (" + String.format("%.1f", (processedRecords * 100.0 / totalRecords)) + "%) - " +
-                                             String.format("%.0f", processedRecords / ((System.currentTimeMillis() - startTime) / 1000.0)) + " records/sec");
+                            System.out.println("📊 Progress: " + processedRecords + "/" + totalRecords +
+                                             " (" + String.format("%.1f", (processedRecords * 100.0 / totalRecords)) + "%)");
                         }
                     } else {
                         skippedRecords++;
@@ -99,6 +102,12 @@ public class OptimizedDataUploadService {
             if (!students.isEmpty()) {
                 studentRepository.saveAll(students);
                 progressCounter.set(processedRecords);
+
+                // Print a message if we're saving partial data due to cancellation
+                if (cancelRequested) {
+                    System.out.println("🔄 Upload cancelled but saved " + processedRecords +
+                                     " records, including " + students.size() + " from the final batch");
+                }
             }
         }
 
@@ -116,9 +125,9 @@ public class OptimizedDataUploadService {
         result.setVerificationMessage(verificationResult);
         result.setSuccess(true);
 
-        System.out.println("⚡ ULTRA-FAST upload completed: " + processedRecords + " records processed, " +
+        System.out.println("✅ Upload completed: " + processedRecords + " records processed, " +
                           newRecords + " new records added, " + skippedRecords + " records skipped in " +
-                          processingTime + "ms (" + String.format("%.0f", processedRecords / (processingTime / 1000.0)) + " records/sec)");
+                          processingTime + "ms");
 
         return result;
     }
@@ -126,8 +135,20 @@ public class OptimizedDataUploadService {
     private Student parseStudentFromCsvOptimized(String[] data) {
         Student student = new Student();
 
-        // Parse studentId - handle decimal format like "113407.0"
-        student.setStudentId(parseDecimalAsLong(data[0].trim()));
+        // Parse studentId - handle case where studentId might have decimal format
+        String studentIdStr = data[0].trim();
+        try {
+            // Try to parse as double first, then convert to long if it has decimal part
+            if (studentIdStr.contains(".")) {
+                double doubleId = Double.parseDouble(studentIdStr);
+                student.setStudentId((long) doubleId);
+            } else {
+                student.setStudentId(Long.parseLong(studentIdStr));
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("⚠️ Warning: Invalid student ID format: " + studentIdStr);
+            throw e;
+        }
 
         // Parse firstName and lastName (trim and capitalize)
         student.setFirstName(capitalizeFirstLetter(data[1].trim()));
@@ -143,7 +164,20 @@ public class OptimizedDataUploadService {
         // Parse score and apply +5 adjustment for database storage per Objective C
         // Objective C requirement: "student database score = student Excel score + 5"
         // CSV contains the original Excel score + 10 (from Objective B processing)
-        int csvScore = parseDecimalAsInt(data[5].trim());
+        String scoreStr = data[5].trim();
+        int csvScore;
+        try {
+            // Handle decimal format scores by converting to double first, then to int
+            if (scoreStr.contains(".")) {
+                double doubleScore = Double.parseDouble(scoreStr);
+                csvScore = (int) doubleScore;
+            } else {
+                csvScore = Integer.parseInt(scoreStr);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("⚠️ Warning: Invalid score format: " + scoreStr);
+            throw e;
+        }
         int originalExcelScore = csvScore - 10; // Extract original Excel score
         int databaseScore = originalExcelScore + 5; // Apply +5 as per Objective C requirement
         student.setScore(databaseScore);
@@ -154,21 +188,6 @@ public class OptimizedDataUploadService {
     private String capitalizeFirstLetter(String str) {
         if (str == null || str.isEmpty()) return str;
         return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
-    }
-
-    // ⚡ ULTRA-FAST decimal parsing methods to handle "123.0" format
-    private long parseDecimalAsLong(String value) {
-        if (value.contains(".")) {
-            return (long) Double.parseDouble(value);
-        }
-        return Long.parseLong(value);
-    }
-
-    private int parseDecimalAsInt(String value) {
-        if (value.contains(".")) {
-            return (int) Double.parseDouble(value);
-        }
-        return Integer.parseInt(value);
     }
 
     private String verifyUploadedData() {
@@ -210,9 +229,23 @@ public class OptimizedDataUploadService {
         } catch (Exception e) {
             return "❌ Verification failed: " + e.getMessage();
         }
-    }    public int getProgress() {
+    }
+
+    public int getProgress() {
         if (totalRecords == 0) return 0;
         return (int) ((progressCounter.get() * 100.0) / totalRecords);
+    }
+
+    /**
+     * Cancel the current upload operation but save any already processed records
+     */
+    @Transactional
+    public void cancelUpload() {
+        this.cancelRequested = true;
+        System.out.println("⚠️ Upload cancellation requested");
+
+        // No need to do anything else - the main processing loop will exit and
+        // any remaining processed students will be saved at the end of the method
     }
 
     private boolean isHeaderRow(String[] row) {
