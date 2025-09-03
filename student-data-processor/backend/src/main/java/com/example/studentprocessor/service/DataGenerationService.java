@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -232,9 +231,5 @@ public class DataGenerationService {
         return names;
     }
 
-    private void autoSizeColumns(Sheet sheet) {
-        for (int i = 0; i < 6; i++) {
-            sheet.autoSizeColumn(i);
-        }
-    }
+    // Removed unused autoSizeColumns method for code cleanliness
 }

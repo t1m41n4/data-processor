@@ -3,14 +3,14 @@
   <div class="header">
     <h1>📤 Data Upload - Objective C</h1>
     <p>Upload CSV files to database with automatic +5 score adjustment</p>
-  </div>
+  <!-- Removed extra closing div to fix template error -->
 
   <!-- File Upload Section -->
   <div class="upload-section">
     <div
       class="file-drop-zone"
       [class.has-file]="selectedFile"
-      (click)="triggerFileInput()"
+      (click)="!selectedFile && triggerFileInput()"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave($event)"
       (drop)="onFileDropped($event)">
@@ -23,7 +23,7 @@
         (change)="onFileSelected($event)"
         style="display: none;">
 
-      <label for="fileInput" class="upload-label">
+      <label class="upload-label">
         <div class="upload-icon">💾</div>
         <div class="upload-text">
           <span *ngIf="!selectedFile" class="upload-main">Click to select CSV file</span>
@@ -44,38 +44,42 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="button-group" *ngIf="selectedFile" (click)="$event.stopPropagation()">
-      <!-- Upload Button - Only shown when not uploading -->
-      <button
-        *ngIf="!isUploading"
-        (click)="onUploadFile()"
-        [disabled]="!selectedFile"
-        class="btn btn-primary">
-        Upload to Database (+5 Score Boost)
-      </button>
+    <!-- End of file-drop-zone -->
+  </div>
 
-      <!-- Cancel Button - Only shown when uploading -->
-      <button
-        *ngIf="isUploading"
-        (click)="cancelUpload()"
-        class="btn btn-danger">
-        <span class="cancel-icon">⚠️</span>
-        Cancel Upload
-      </button>
+  <!-- Action Buttons moved outside drop zone to prevent double dialog -->
+  <div class="button-group" *ngIf="selectedFile">
+    <!-- Upload Button - Only shown when not uploading -->
+    <button
+      *ngIf="!isUploading"
+      (click)="onUploadFile()"
+      [disabled]="!selectedFile"
+      class="btn btn-primary">
+      Upload to Database (+5 Score Boost)
+    </button>
 
-      <!-- Upload Status - Only shown when uploading -->
-      <div *ngIf="isUploading" class="upload-status">
-        <span class="spinner"></span>
-        <span>Uploading to Database... Partial data will be available for reporting.</span>
-      </div>
+    <!-- Cancel Button - Only shown when uploading -->
+    <button
+      *ngIf="isUploading"
+      (click)="cancelUpload()"
+      class="btn btn-danger">
+      <span class="cancel-icon">⚠️</span>
+      Cancel Upload
+    </button>
 
-      <button
-        (click)="clearSelection()"
-        [disabled]="isUploading"
-        class="btn btn-secondary">
-        Clear Selection
-      </button>
+    <!-- Upload Status - Only shown when uploading -->
+    <div *ngIf="isUploading" class="upload-status">
+      <span class="spinner"></span>
+      <span>Uploading to Database... Partial data will be available for reporting.</span>
     </div>
+
+    <button
+      (click)="clearSelection()"
+      [disabled]="isUploading"
+      class="btn btn-secondary">
+      Clear Selection
+    </button>
+  </div>
   </div>
 
   <!-- Progress Indicator -->

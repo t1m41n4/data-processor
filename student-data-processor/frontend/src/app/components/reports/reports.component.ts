@@ -82,6 +82,7 @@ export class ReportsComponent implements OnInit {
 
   // UI state properties
   isLoading = false;
+  isDeleting = false;
   errorMessage = '';
   successMessage = '';
   showFilters = false;
@@ -364,20 +365,20 @@ export class ReportsComponent implements OnInit {
 
     // Confirm before deleting
     if (confirm(`WARNING: This action will permanently delete ALL ${this.statistics.totalStudents} records from the database. This cannot be undone. Continue?`)) {
-      this.isLoading = true;
+      this.isDeleting = true;
       this.errorMessage = '';
       this.successMessage = '';
 
       this.http.delete(`${this.apiUrl}/clear-data`).subscribe({
         next: () => {
           this.successMessage = `Successfully deleted ${this.statistics?.totalStudents || 'all'} records from the database`;
-          this.isLoading = false;
+          this.isDeleting = false;
           // Reload data to reflect the changes
           this.loadInitialData();
         },
         error: (error) => {
           this.errorMessage = 'Failed to delete records: ' + (error.error?.message || error.message);
-          this.isLoading = false;
+          this.isDeleting = false;
         }
       });
     }

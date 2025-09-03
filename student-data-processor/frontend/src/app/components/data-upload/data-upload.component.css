@@ -108,6 +108,12 @@
   gap: 1rem;
   margin-top: 2rem;
   justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.file-drop-zone {
+  z-index: 1;
 }
 
 .btn {

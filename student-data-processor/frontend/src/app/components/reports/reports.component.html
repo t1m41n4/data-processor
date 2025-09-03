@@ -49,7 +49,7 @@
           (keyup.enter)="onSearch()"
           placeholder="Search students by name, email, or ID..."
           class="search-input">
-        <button (click)="onSearch()" class="search-btn" [disabled]="isLoading">
+        <button (click)="onSearch()" class="search-btn" [disabled]="isLoading || isDeleting">
           <span class="search-icon">🔍</span>
         </button>
       </div>
@@ -73,21 +73,21 @@
         <button
           (click)="exportData('excel')"
           class="btn btn-export excel"
-          [disabled]="isExporting">
+          [disabled]="isExporting || isDeleting">
           <span class="export-icon">📊</span>
           {{ isExporting ? 'Exporting...' : 'Excel' }}
         </button>
         <button
           (click)="exportData('pdf')"
           class="btn btn-export pdf"
-          [disabled]="isExporting">
+          [disabled]="isExporting || isDeleting">
           <span class="export-icon">📄</span>
           PDF
         </button>
         <button
           (click)="exportData('csv')"
           class="btn btn-export csv"
-          [disabled]="isExporting">
+          [disabled]="isExporting || isDeleting">
           <span class="export-icon">📋</span>
           CSV
         </button>
@@ -101,9 +101,9 @@
         <button
           (click)="deleteAllRecords()"
           class="btn btn-danger"
-          [disabled]="isLoading">
+          [disabled]="isDeleting">
           <span class="delete-icon">🗑️</span>
-          Delete All Records
+          {{ isDeleting ? 'Deleting...' : 'Delete All Records' }}
         </button>
       </div>
     </div>
@@ -185,9 +185,9 @@
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="isLoading" class="loading-container">
+  <div *ngIf="isLoading || isDeleting" class="loading-container">
     <div class="spinner"></div>
-    <p>Loading students...</p>
+    <p>{{ isDeleting ? 'Deleting records...' : 'Loading students...' }}</p>
   </div>
 
   <!-- Error Message -->
@@ -205,7 +205,7 @@
   </div>
 
   <!-- Students Table -->
-  <div class="table-container" *ngIf="!isLoading && students.length > 0">
+  <div class="table-container" *ngIf="!isLoading && !isDeleting && students.length > 0">
     <div class="card">
       <div class="card-header">
         <h3>📋 Student Records</h3>
@@ -259,7 +259,7 @@
   </div>
 
   <!-- Pagination -->
-  <div class="pagination-container" *ngIf="!isLoading && students.length > 0">
+  <div class="pagination-container" *ngIf="!isLoading && !isDeleting && students.length > 0">
     <div class="pagination-info">
       <p>Page {{ currentPage + 1 }} of {{ totalPages }} ({{ totalItems }} total students)</p>
     </div>
@@ -306,7 +306,7 @@
   </div>
 
   <!-- No Data State -->
-  <div *ngIf="!isLoading && students.length === 0" class="no-data-container">
+  <div *ngIf="!isLoading && !isDeleting && students.length === 0" class="no-data-container">
     <div class="no-data-content">
       <div class="no-data-icon">📊</div>
       <h3>No Students Found</h3>

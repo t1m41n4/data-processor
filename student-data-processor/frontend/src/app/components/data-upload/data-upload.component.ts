@@ -112,7 +112,7 @@ export class DataUploadComponent {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.uploadSubscription = this.http.post('http://localhost:8080/api/upload/csv/optimized', formData).subscribe({
+    this.uploadSubscription = this.http.post('http://localhost:8080/api/upload/csv/ultra-fast', formData).subscribe({
       next: (response) => {
         this.isUploading = false;
         this.uploadProgress = 100;

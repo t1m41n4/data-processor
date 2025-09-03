@@ -12,9 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -35,59 +36,54 @@ public class OptimizedDataUploadService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("Please select a CSV file to upload");
         }
-
         if (!isCsvFile(file)) {
             throw new IllegalArgumentException("Please upload a valid CSV file");
         }
-
-        // Reset cancel flag before starting a new upload
         cancelRequested = false;
-
         long startTime = System.currentTimeMillis();
         List<Student> students = new ArrayList<>();
         int processedRecords = 0;
         int skippedRecords = 0;
         int newRecords = 0;
-
-        // Reset progress counter
         progressCounter.set(0);
-
-        try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
+    long elapsed = 0;
+    try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
             List<String[]> records = csvReader.readAll();
-
-            // Calculate total records for progress tracking
             boolean hasHeader = records.size() > 0 && isHeaderRow(records.get(0));
             totalRecords = records.size() - (hasHeader ? 1 : 0);
             int startIndex = hasHeader ? 1 : 0;
-
             System.out.println("🚀 Starting optimized upload of " + totalRecords + " records...");
-
-            // Process in larger batches for better performance
-            final int BATCH_SIZE = 5000; // Increased from 1000
-
+            final int BATCH_SIZE = 5000;
+            // --- Optimization: Batch existence check ---
+            Set<Long> csvStudentIds = new HashSet<>();
+            for (int i = startIndex; i < records.size(); i++) {
+                String[] data = records.get(i);
+                if (data.length >= 1) {
+                    String studentIdStr = data[0].trim();
+                    try {
+                        long studentId = studentIdStr.contains(".") ? (long) Double.parseDouble(studentIdStr) : Long.parseLong(studentIdStr);
+                        csvStudentIds.add(studentId);
+                    } catch (NumberFormatException ignore) {}
+                }
+            }
+            Set<Long> existingIds = studentRepository.findExistingStudentIds(csvStudentIds);
             for (int i = startIndex; i < records.size() && !cancelRequested; i++) {
                 String[] data = records.get(i);
-
                 try {
                     if (data.length >= 6) {
                         Student student = parseStudentFromCsvOptimized(data);
-
-                        // Check if student already exists to avoid duplicates
-                        if (!studentRepository.existsByStudentId(student.getStudentId())) {
+                        if (!existingIds.contains(student.getStudentId())) {
                             students.add(student);
                             newRecords++;
+                            existingIds.add(student.getStudentId());
                         }
                         processedRecords++;
-
-                        // Batch save for performance
                         if (students.size() >= BATCH_SIZE) {
                             studentRepository.saveAll(students);
                             students.clear();
-
-                            // Update progress
                             progressCounter.set(processedRecords);
                             System.out.println("📊 Progress: " + processedRecords + "/" + totalRecords +
-                                             " (" + String.format("%.1f", (processedRecords * 100.0 / totalRecords)) + "%)");
+                                    " (" + String.format("%.1f", (processedRecords * 100.0 / totalRecords)) + "%)");
                         }
                     } else {
                         skippedRecords++;
@@ -97,77 +93,35 @@ public class OptimizedDataUploadService {
                     System.out.println("⚠️ Skipped record at line " + (i + 1) + ": " + e.getMessage());
                 }
             }
-
-            // Save remaining records
             if (!students.isEmpty()) {
                 studentRepository.saveAll(students);
                 progressCounter.set(processedRecords);
-
-                // Print a message if we're saving partial data due to cancellation
                 if (cancelRequested) {
                     System.out.println("🔄 Upload cancelled but saved " + processedRecords +
-                                     " records, including " + students.size() + " from the final batch");
+                            " records, including " + students.size() + " from the final batch");
                 }
             }
+            elapsed = System.currentTimeMillis() - startTime;
         }
-
-        long endTime = System.currentTimeMillis();
-        long processingTime = endTime - startTime;
-
-        // Verification step - check a sample of records
-        String verificationResult = verifyUploadedData();
-
         UploadResult result = new UploadResult();
-        result.setTotalRecords(processedRecords);
+        result.setTotalRecords(totalRecords);
         result.setNewRecords(newRecords);
         result.setSkippedRecords(skippedRecords);
-        result.setProcessingTime(processingTime);
-        result.setVerificationMessage(verificationResult);
+        result.setProcessingTime(elapsed);
         result.setSuccess(true);
-
-        System.out.println("✅ Upload completed: " + processedRecords + " records processed, " +
-                          newRecords + " new records added, " + skippedRecords + " records skipped in " +
-                          processingTime + "ms");
-
+        result.setVerificationMessage(verifyUploadedData());
         return result;
-    }
-
+        }
+    // Helper to parse a student from CSV row
     private Student parseStudentFromCsvOptimized(String[] data) {
         Student student = new Student();
-
-        // Parse studentId - handle case where studentId might have decimal format
-        String studentIdStr = data[0].trim();
-        try {
-            // Try to parse as double first, then convert to long if it has decimal part
-            if (studentIdStr.contains(".")) {
-                double doubleId = Double.parseDouble(studentIdStr);
-                student.setStudentId((long) doubleId);
-            } else {
-                student.setStudentId(Long.parseLong(studentIdStr));
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("⚠️ Warning: Invalid student ID format: " + studentIdStr);
-            throw e;
-        }
-
-        // Parse firstName and lastName (trim and capitalize)
         student.setFirstName(capitalizeFirstLetter(data[1].trim()));
         student.setLastName(capitalizeFirstLetter(data[2].trim()));
-
-        // Parse DOB
-        LocalDate dob = LocalDate.parse(data[3].trim());
-        student.setDob(dob);
-
-        // Parse className
+        student.setDob(LocalDate.parse(data[3].trim()));
         student.setClassName(data[4].trim());
-
-        // Parse score and apply +5 adjustment for database storage per Objective C
-        // Objective C requirement: "student database score = student Excel score + 5"
-        // CSV contains the original Excel score + 10 (from Objective B processing)
         String scoreStr = data[5].trim();
         int csvScore;
         try {
-            // Handle decimal format scores by converting to double first, then to int
             if (scoreStr.contains(".")) {
                 double doubleScore = Double.parseDouble(scoreStr);
                 csvScore = (int) doubleScore;
@@ -178,10 +132,9 @@ public class OptimizedDataUploadService {
             System.out.println("⚠️ Warning: Invalid score format: " + scoreStr);
             throw e;
         }
-        int originalExcelScore = csvScore - 10; // Extract original Excel score
-        int databaseScore = originalExcelScore + 5; // Apply +5 as per Objective C requirement
+        int originalExcelScore = csvScore - 10;
+        int databaseScore = originalExcelScore + 5;
         student.setScore(databaseScore);
-
         return student;
     }
 
