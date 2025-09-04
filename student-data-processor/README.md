@@ -1,13 +1,12 @@
 # Student Data Processor
 
-A full-stack application for processing and managing student## 📋 **Tested Developer Experience Report**eSQL database integration.
+A full-stack application for processing and managing student data
 
-## 🚀 Quick Start Guide - Tested Developer Experience
+## 🚀 Quick Start Guide
 
 ### ⚡ **For Developers with Prerequisites** 
 
-**Prerequisites:** Node.js 18+, Java 17+, Maven 3.6+, PostgreSQL 17+
-**Total Setup Time: 5-10 minutes**
+**Prerequisites:** Angular 18 + Java 17+, Maven 3.6+, PostgreSQL 17+
 
 #### **Step 1: Clone and Navigate**
 ```bash
@@ -50,4 +49,5 @@ cd frontend
 ng serve --port 4200
 # Expected output: "Angular Live Development Server is listening on port 4200"
 ```
+
 
