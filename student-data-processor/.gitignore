@@ -1,0 +1,77 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.log
+*.tmp
+hs_err_pid*.log
+replay_pid*.log
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+apache-maven-3.9.4/
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+
+# Node.js & Angular
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+.angular/
+
+# Database files
+data/
+*.mv.db
+*.db
+
+# Large files that shouldn't be in Git
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.csv
+*.xlsx
+*.xls
+*.pdf
+*.zip
+*.tar.gz
+
+# Test files and reports
+**/test_*.*
+**/*_report.*
+**/*_export.*
+DatabaseTest.java
+SimpleDBTest.java
+FileUploadTest.class
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+logs/
+*.log
