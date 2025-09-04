@@ -86,6 +86,9 @@ public class ReportService {
     }
 
     public String exportToExcel(Long studentId, String className) throws IOException {
+        System.out.println("=== EXCEL EXPORT STARTED ===");
+        System.out.println("Using OPTIMIZED batch processing (1000 records per batch)");
+
         // Create output directory if it doesn't exist
         Path outputDir = Paths.get(outputPath);
         if (!Files.exists(outputDir)) {
@@ -121,6 +124,7 @@ public class ReportService {
 
             do {
                 students = getStudentReports(studentId, className, pageNumber, batchSize, "studentId", "asc");
+                System.out.println("Excel: Processing batch " + (pageNumber + 1) + " with " + students.getContent().size() + " records");
 
                 for (Student student : students.getContent()) {
                     Row row = sheet.createRow(rowNum++);
@@ -153,6 +157,9 @@ public class ReportService {
     }
 
     public String exportToCsv(Long studentId, String className) throws IOException {
+        System.out.println("=== CSV EXPORT STARTED ===");
+        System.out.println("Using OPTIMIZED batch processing (2000 records per batch)");
+
         // Create output directory if it doesn't exist
         Path outputDir = Paths.get(outputPath);
         if (!Files.exists(outputDir)) {
@@ -202,6 +209,9 @@ public class ReportService {
     }
 
     public String exportToPdf(Long studentId, String className) throws IOException, DocumentException {
+        System.out.println("=== PDF EXPORT STARTED ===");
+        System.out.println("Using OPTIMIZED batch processing (500 records per batch)");
+
         // Create output directory if it doesn't exist
         Path outputDir = Paths.get(outputPath);
         if (!Files.exists(outputDir)) {
