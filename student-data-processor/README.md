@@ -4,7 +4,6 @@ A full-stack application for processing and managing student data
 
 ## 🚀 Quick Start Guide
 
-### ⚡ **For Developers with Prerequisites** 
 
 **Prerequisites:** Angular 18 + Java 17+, Maven 3.6+, PostgreSQL 17+
 
@@ -25,6 +24,10 @@ npm install --legacy-peer-deps
 **Backend Setup:**
 ```bash
 cd backend
+
+# Add Maven to PATH  
+$env:PATH += ";C:\tools\apache-maven-3.9.4\bin"
+
 mvn clean install
 ```
 
@@ -49,5 +52,6 @@ cd frontend
 ng serve --port 4200
 # Expected output: "Angular Live Development Server is listening on port 4200"
 ```
+
 
 
