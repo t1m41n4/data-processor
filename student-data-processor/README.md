@@ -37,7 +37,7 @@ mvn clean install
 ```bash
 cd backend
 # Add Maven to PATH for this session
-$env:PATH += ";C:\apache-maven-3.9.9\bin"
+$env:PATH += ";C:\tools\apache-maven-3.9.4\bin"
 
 # Verify Maven is now available
 mvn --version
