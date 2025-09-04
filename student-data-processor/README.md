@@ -21,14 +21,12 @@ cd student-data-processor
 ```bash
 cd frontend
 npm install --legacy-peer-deps
-# Expected: ~30 seconds, resolves all dependency conflicts
 ```
 
 **Backend Setup:**
 ```bash
 cd backend
 mvn clean install
-# Expected: ~60 seconds, all tests pass, build success
 ```
 
 #### **Step 3: Start the Application**
@@ -52,3 +50,4 @@ cd frontend
 ng serve --port 4200
 # Expected output: "Angular Live Development Server is listening on port 4200"
 ```
+
