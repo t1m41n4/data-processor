@@ -38,7 +38,6 @@ yarn-debug.log*
 yarn-error.log*
 dist/
 .angular/
-package-lock.json
 
 # Test files and reports
 **/test_*.pdf
