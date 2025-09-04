@@ -278,16 +278,20 @@ export class ReportsComponent implements OnInit {
 
     const url = `${this.apiUrl}/export/${format}?${params}`;
 
-    // For downloads, we'll use window.open or create a download link
+    // All formats should trigger automatic download
     if (format === 'csv') {
       this.downloadFile(url, `student_report.${format}`);
     } else {
-      // For Excel and PDF, call the API and handle the response
+      // For Excel and PDF, first generate the file, then download it
       this.http.get(`${this.apiUrl}/export/${format}?${params}`).subscribe({
         next: (response: any) => {
           this.successMessage = `${format.toUpperCase()} report generated successfully!`;
           if (response.fileName) {
             this.successMessage += ` File: ${response.fileName}`;
+
+            // Automatically download the generated file
+            const downloadUrl = `${this.apiUrl}/download/${response.fileName}`;
+            this.downloadFile(downloadUrl, response.fileName);
           }
           this.isExporting = false;
         },

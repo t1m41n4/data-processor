@@ -96,10 +96,10 @@ public class ReportService {
         String fileName = String.format("student_report_%s.xlsx", timestamp);
         String fullPath = outputPath + fileName;
 
-        // Get filtered data
-        Page<Student> students = getStudentReports(studentId, className, 0, Integer.MAX_VALUE, "studentId", "asc");
+        // Use streaming for large datasets
+        try (FileOutputStream fileOut = new FileOutputStream(fullPath);
+             Workbook workbook = new XSSFWorkbook()) {
 
-        try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Student Report");
 
             // Create header row
@@ -113,26 +113,40 @@ public class ReportService {
                 cell.setCellStyle(headerStyle);
             }
 
-            // Add data rows
+            // Process data in batches to reduce memory usage
+            int batchSize = 1000;
+            int pageNumber = 0;
             int rowNum = 1;
-            for (Student student : students.getContent()) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(student.getStudentId());
-                row.createCell(1).setCellValue(student.getFirstName());
-                row.createCell(2).setCellValue(student.getLastName());
-                row.createCell(3).setCellValue(student.getDob().toString());
-                row.createCell(4).setCellValue(student.getClassName());
-                row.createCell(5).setCellValue(student.getScore());
-            }
+            Page<Student> students;
 
-            // Auto-size columns
+            do {
+                students = getStudentReports(studentId, className, pageNumber, batchSize, "studentId", "asc");
+
+                for (Student student : students.getContent()) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(student.getStudentId());
+                    row.createCell(1).setCellValue(student.getFirstName());
+                    row.createCell(2).setCellValue(student.getLastName());
+                    row.createCell(3).setCellValue(student.getDob().toString());
+                    row.createCell(4).setCellValue(student.getClassName());
+                    row.createCell(5).setCellValue(student.getScore());
+                }
+
+                pageNumber++;
+
+                // Flush memory every 5 batches
+                if (pageNumber % 5 == 0) {
+                    System.gc(); // Suggest garbage collection
+                }
+
+            } while (students.hasNext());
+
+            // Auto-size columns only for headers (more efficient)
             for (int i = 0; i < headers.length; i++) {
                 sheet.autoSizeColumn(i);
             }
 
-            try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
-                workbook.write(fileOut);
-            }
+            workbook.write(fileOut);
         }
 
         return fileName;
@@ -149,28 +163,39 @@ public class ReportService {
         String fileName = String.format("student_report_%s.csv", timestamp);
         String fullPath = outputPath + fileName;
 
-        // Get filtered data
-        Page<Student> students = getStudentReports(studentId, className, 0, Integer.MAX_VALUE, "studentId", "asc");
-
-        try (FileWriter fileWriter = new FileWriter(fullPath);
-             CSVWriter csvWriter = new CSVWriter(fileWriter)) {
+        // Use buffered writer for better performance
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(fullPath));
+             CSVWriter csvWriter = new CSVWriter(bufferedWriter)) {
 
             // Write header
             String[] headers = {"Student ID", "First Name", "Last Name", "Date of Birth", "Class", "Score"};
             csvWriter.writeNext(headers);
 
-            // Write data
-            for (Student student : students.getContent()) {
-                String[] data = {
-                    student.getStudentId().toString(),
-                    student.getFirstName(),
-                    student.getLastName(),
-                    student.getDob().toString(),
-                    student.getClassName(),
-                    student.getScore().toString()
-                };
-                csvWriter.writeNext(data);
-            }
+            // Process data in batches to reduce memory usage
+            int batchSize = 2000; // Larger batch for CSV as it's lighter
+            int pageNumber = 0;
+            Page<Student> students;
+
+            do {
+                students = getStudentReports(studentId, className, pageNumber, batchSize, "studentId", "asc");
+
+                for (Student student : students.getContent()) {
+                    String[] data = {
+                        student.getStudentId().toString(),
+                        student.getFirstName(),
+                        student.getLastName(),
+                        student.getDob().toString(),
+                        student.getClassName(),
+                        student.getScore().toString()
+                    };
+                    csvWriter.writeNext(data);
+                }
+
+                // Flush buffer every batch for immediate write
+                csvWriter.flush();
+                pageNumber++;
+
+            } while (students.hasNext());
         }
 
         return fileName;
@@ -186,9 +211,6 @@ public class ReportService {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String fileName = String.format("student_report_%s.pdf", timestamp);
         String fullPath = outputPath + fileName;
-
-        // Get filtered data
-        Page<Student> students = getStudentReports(studentId, className, 0, Integer.MAX_VALUE, "studentId", "asc");
 
         // Create and write PDF document
         try (FileOutputStream fileOut = new FileOutputStream(fullPath)) {
@@ -216,15 +238,30 @@ public class ReportService {
                 table.addCell(cell);
             }
 
-            // Add data
+            // Process data in batches to reduce memory usage
+            int batchSize = 500; // Smaller batch for PDF as it's more memory intensive
+            int pageNumber = 0;
+            Page<Student> students;
             com.itextpdf.text.Font dataFont = FontFactory.getFont(FontFactory.HELVETICA, 9);
-            for (Student student : students.getContent()) {
-                table.addCell(new Phrase(student.getStudentId().toString(), dataFont));
-                table.addCell(new Phrase(student.getFirstName(), dataFont));
-                table.addCell(new Phrase(student.getLastName(), dataFont));
-                table.addCell(new Phrase(student.getClassName(), dataFont));
-                table.addCell(new Phrase(student.getScore().toString(), dataFont));
-            }
+
+            do {
+                students = getStudentReports(studentId, className, pageNumber, batchSize, "studentId", "asc");
+
+                for (Student student : students.getContent()) {
+                    table.addCell(new Phrase(student.getStudentId().toString(), dataFont));
+                    table.addCell(new Phrase(student.getFirstName(), dataFont));
+                    table.addCell(new Phrase(student.getLastName(), dataFont));
+                    table.addCell(new Phrase(student.getDob().toString(), dataFont));
+                    table.addCell(new Phrase(student.getClassName(), dataFont));
+                    table.addCell(new Phrase(student.getScore().toString(), dataFont));
+                }
+
+                pageNumber++;
+
+                // For very large datasets, we might need to split into multiple documents
+                // but for moderate optimization, this batching should be sufficient
+
+            } while (students.hasNext());
 
             document.add(table);
             document.close();

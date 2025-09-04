@@ -5,10 +5,14 @@ import com.example.studentprocessor.repository.StudentRepository;
 import com.example.studentprocessor.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -155,6 +159,41 @@ public class ReportController {
             response.put("error", e.getClass().getSimpleName());
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    @GetMapping("/download/{fileName}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable String fileName) {
+        try {
+            // Build the full file path
+            String filePath = "C:/var/log/applications/API/dataprocessing/" + fileName;
+            Path path = Paths.get(filePath);
+
+            // Check if file exists
+            if (!Files.exists(path)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Read file content
+            byte[] content = Files.readAllBytes(path);
+
+            // Determine content type based on file extension
+            String contentType = "application/octet-stream";
+            if (fileName.endsWith(".xlsx")) {
+                contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            } else if (fileName.endsWith(".pdf")) {
+                contentType = "application/pdf";
+            } else if (fileName.endsWith(".csv")) {
+                contentType = "text/csv";
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .body(content);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
