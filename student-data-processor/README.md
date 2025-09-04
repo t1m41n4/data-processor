@@ -36,8 +36,14 @@ mvn clean install
 **Terminal 1 - Backend:**
 ```bash
 cd backend
+# Add Maven to PATH for this session
+$env:PATH += ";C:\apache-maven-3.9.9\bin"
+
+# Verify Maven is now available
+mvn --version
+
+# Now run the backend
 mvn spring-boot:run
-# Expected output: "Tomcat started on port 8080"
 ```
 
 **Terminal 2 - Frontend:**
