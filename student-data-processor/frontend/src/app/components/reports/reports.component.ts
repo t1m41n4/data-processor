@@ -320,6 +320,41 @@ export class ReportsComponent implements OnInit {
       });
   }
 
+  // Fetch 10th Record functionality
+  tenthRecord: Student | null = null;
+  showTenthRecordModal = false;
+
+  fetchTenthRecord(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    // Use the dedicated endpoint for fetching the 10th record
+    const url = `${this.apiUrl}/tenth-record`;
+
+    this.http.get<Student>(url).subscribe({
+      next: (student) => {
+        this.tenthRecord = student;
+        this.showTenthRecordModal = true;
+        this.successMessage = 'Successfully fetched the 10th record from database';
+        this.isLoading = false;
+      },
+      error: (error) => {
+        if (error.status === 404) {
+          this.errorMessage = 'Database contains less than 10 records. Cannot fetch 10th record.';
+        } else {
+          this.errorMessage = 'Failed to fetch 10th record: ' + (error.error?.message || error.message);
+        }
+        this.isLoading = false;
+      }
+    });
+  }
+
+  closeTenthRecordModal(): void {
+    this.showTenthRecordModal = false;
+    this.tenthRecord = null;
+  }
+
   // Utility methods
   getPageNumbers(): number[] {
     const pages: number[] = [];

@@ -56,7 +56,18 @@ public class ReportService {
         return studentRepository.findByClassName(className, pageable);
     }
 
-    // Helper method for getting student reports with filters
+    // 4. Get 10th Record
+    public Student getTenthRecord() {
+        // Get records sorted by studentId in ascending order, same as reports page, then fetch the 10th one (offset 9)
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("studentId").ascending());
+        Page<Student> page = studentRepository.findAll(pageable);
+
+        if (page.getContent().size() >= 10) {
+            return page.getContent().get(9); // 10th record (0-indexed)
+        } else {
+            return null; // Not enough records
+        }
+    }    // Helper method for getting student reports with filters
     public Page<Student> getStudentReports(Long studentId, String className, int page, int size, String sortBy, String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("desc") ?
                    Sort.by(sortBy).descending() :

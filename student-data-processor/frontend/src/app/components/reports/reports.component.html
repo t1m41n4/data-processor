@@ -91,6 +91,13 @@
           <span class="export-icon">📋</span>
           CSV
         </button>
+        <button
+          (click)="fetchTenthRecord()"
+          class="btn btn-export tenth-record"
+          [disabled]="isLoading">
+          <span class="export-icon">🔍</span>
+          View 10th Record
+        </button>
       </div>
     </div>
 
@@ -312,6 +319,47 @@
       <h3>No Students Found</h3>
       <p>No student records match your current search criteria.</p>
       <button (click)="clearFilters()" class="btn btn-primary">Clear Filters</button>
+    </div>
+  </div>
+
+  <!-- 10th Record Modal -->
+  <div *ngIf="showTenthRecordModal" class="modal-overlay" (click)="closeTenthRecordModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🎯 10th Record from Database</h3>
+        <button class="modal-close" (click)="closeTenthRecordModal()">×</button>
+      </div>
+      <div class="modal-body" *ngIf="tenthRecord">
+        <div class="record-details">
+          <div class="record-field">
+            <strong>ID:</strong> {{ tenthRecord.id }}
+          </div>
+          <div class="record-field">
+            <strong>Student ID:</strong> {{ tenthRecord.studentId }}
+          </div>
+          <div class="record-field">
+            <strong>Name:</strong> {{ tenthRecord.firstName }} {{ tenthRecord.lastName }}
+          </div>
+          <div class="record-field">
+            <strong>Email:</strong> {{ tenthRecord.email }}
+          </div>
+          <div class="record-field">
+            <strong>Date of Birth:</strong> {{ tenthRecord.dob }}
+          </div>
+          <div class="record-field">
+            <strong>Class:</strong> {{ tenthRecord.className }}
+          </div>
+          <div class="record-field">
+            <strong>Score:</strong>
+            <span [class]="getScoreBadge(tenthRecord.score)" class="score-badge">
+              {{ tenthRecord.score }}%
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeTenthRecordModal()">Close</button>
+      </div>
     </div>
   </div>
 </div>

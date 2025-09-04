@@ -62,6 +62,21 @@ public class ReportController {
         }
     }
 
+    // 4. Get 10th Record
+    @GetMapping("/tenth-record")
+    public ResponseEntity<Student> getTenthRecord() {
+        try {
+            Student tenthRecord = reportService.getTenthRecord();
+            if (tenthRecord != null) {
+                return ResponseEntity.ok(tenthRecord);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
     @GetMapping("/export/excel")
     public ResponseEntity<Map<String, Object>> exportToExcel(
             @RequestParam(required = false) Long studentId,
