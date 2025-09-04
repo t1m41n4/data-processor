@@ -154,8 +154,8 @@ public class OptimizedDataUploadService {
 
             StringBuilder verification = new StringBuilder();
             verification.append("✅ SQL DATABASE VERIFICATION SUCCESSFUL!\n");
-            verification.append("📊 Database Type: H2 SQL Database (Persistent)\n");
-            verification.append("📂 Database File: ./data/studentdb.mv.db\n");
+            verification.append("📊 Database Type: PostgreSQL Database (Production)\n");
+            verification.append("📂 Database Host: localhost:5432/student_db\n");
             verification.append("🔍 Score Calculation Verified (Excel Score + 5):\n\n");
 
             for (int i = 0; i < Math.min(3, sampleStudents.size()); i++) {

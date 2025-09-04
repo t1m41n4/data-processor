@@ -355,7 +355,7 @@ public class UltraHighPerformanceService {
 
             StringBuilder verification = new StringBuilder();
             verification.append("⚡ ULTRA-FAST PARALLEL VERIFICATION!\n");
-            verification.append("📊 Database Type: H2 SQL Database (Persistent)\n");
+            verification.append("📊 Database Type: PostgreSQL Database (Production)\n");
             verification.append("🚀 Processing Mode: 4 Parallel Threads + 3000 Batch Size + Streaming\n");
             verification.append("🔍 Score Calculation Verified (Excel Score + 5):\n\n");
 
